@@ -1,0 +1,214 @@
+/* ============================================
+   Resume Screener Styles
+   ============================================ */
+
+.screener-page .container {
+  padding-bottom: var(--space-3xl);
+}
+
+.screener-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Upload Section */
+.upload-section,
+.jd-section {
+  padding: var(--space-xl);
+  margin-bottom: var(--space-md);
+}
+
+.upload-section:hover,
+.jd-section:hover {
+  transform: none;
+}
+
+.upload-section h3,
+.jd-section h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 1.1rem;
+  margin-bottom: var(--space-md);
+}
+
+.upload-zone {
+  border: 2px dashed var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.upload-zone:hover {
+  border-color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.03);
+}
+
+.upload-zone.drag-active {
+  border-color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.08);
+  transform: scale(1.01);
+}
+
+.upload-zone.has-file {
+  border-color: var(--success);
+  border-style: solid;
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.upload-placeholder p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.upload-placeholder span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  justify-content: center;
+}
+
+.file-check {
+  font-size: 1.5rem;
+  color: var(--success);
+}
+
+.file-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.file-size {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.jd-textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.analyze-btn {
+  width: 100%;
+  margin-bottom: var(--space-2xl);
+}
+
+/* Results */
+.screener-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.score-section,
+.keywords-section,
+.suggestions-section,
+.formatting-section {
+  padding: var(--space-xl);
+}
+
+.score-section:hover,
+.keywords-section:hover,
+.suggestions-section:hover,
+.formatting-section:hover {
+  transform: none;
+}
+
+.score-section h3,
+.keywords-section h3,
+.suggestions-section h3,
+.formatting-section h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 1.1rem;
+  margin-bottom: var(--space-lg);
+}
+
+.score-display {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-lg) 0;
+}
+
+/* Keyword Tags */
+.keyword-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.keyword-tag {
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.keyword-tag.matched {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.keyword-tag.missing {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--warning);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Suggestions */
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.suggestions-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.suggestion-icon {
+  color: var(--accent-primary);
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+@media (max-width: 768px) {
+  .upload-zone {
+    padding: var(--space-xl);
+  }
+
+  .file-info {
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+}
