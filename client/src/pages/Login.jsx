@@ -71,7 +71,10 @@ export default function Login() {
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="login-password">Password</label>
+              <div className="form-label-row">
+                <label className="form-label" htmlFor="login-password">Password</label>
+                <Link to="/forgot-password" className="forgot-link">Forgot Password?</Link>
+              </div>
               <div className="input-with-icon">
                 <HiLockClosed className="input-icon" />
                 <input
