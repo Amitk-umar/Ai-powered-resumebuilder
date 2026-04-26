@@ -71,10 +71,7 @@ export default function Login() {
             </div>
 
             <div className="form-group">
-              <div className="form-label-row">
-                <label className="form-label" htmlFor="login-password">Password</label>
-                <Link to="/forgot-password" className="forgot-link">Forgot Password?</Link>
-              </div>
+              <label className="form-label" htmlFor="login-password">Password</label>
               <div className="input-with-icon">
                 <HiLockClosed className="input-icon" />
                 <input
@@ -94,6 +91,7 @@ export default function Login() {
                   {showPassword ? <HiEyeOff /> : <HiEye />}
                 </button>
               </div>
+              <Link to="/forgot-password" className="forgot-link">Forgot Password?</Link>
             </div>
 
             <button type="submit" className="btn btn-primary btn-lg auth-submit" disabled={loading}>
