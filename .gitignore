@@ -21,3 +21,10 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# AGENTS framework
+.tmp/
+credentials.json
+token.json
+__pycache__/
+*.pyc

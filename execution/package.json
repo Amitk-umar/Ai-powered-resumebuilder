@@ -1,0 +1,14 @@
+{
+  "name": "resumebuilder-execution",
+  "version": "1.0.0",
+  "description": "Deterministic execution scripts for the ResumeBuilder AGENTS framework",
+  "type": "module",
+  "scripts": {
+    "health":   "node health_check.js",
+    "enhance":  "node enhance_resume_section.js",
+    "screen":   "node run_screening.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

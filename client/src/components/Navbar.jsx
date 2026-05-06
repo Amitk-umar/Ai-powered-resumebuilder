@@ -50,7 +50,7 @@ export default function Navbar() {
               </defs>
             </svg>
           </div>
-          <span className="logo-text">Resume<span className="gradient-text">AI</span></span>
+          <span className="logo-text">NextHire<span className="gradient-text">AI</span></span>
         </Link>
 
         <div className={`navbar-links ${menuOpen ? 'active' : ''}`}>
