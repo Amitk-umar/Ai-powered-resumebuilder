@@ -17,7 +17,18 @@ export default function Home() {
   const [isYearly, setIsYearly] = useState(false);
   const [faqOpen, setFaqOpen] = useState({});
   const [atsStep, setAtsStep] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowWidth < 640;
+  const isTablet = windowWidth >= 640 && windowWidth < 1024;
   const [isAtsScanning, setIsAtsScanning] = useState(false);
+
 
   // Auto-run or manually triggered ATS scanner simulation
   const runAtsScan = () => {
@@ -253,17 +264,17 @@ export default function Home() {
           </div>
 
           {/* Right Hero Side */}
-          <div className="lg:col-span-6 flex justify-center items-center relative min-h-[500px]">
+          <div className="lg:col-span-6 flex justify-center items-center relative min-h-[400px] sm:min-h-[500px]">
             {/* Soft pulse glow ring */}
-            <div className="absolute w-[360px] h-[360px] rounded-full bg-purple-500/5 border border-purple-500/10 animate-ping pointer-events-none" style={{ animationDuration: '6s' }} />
-            <div className="absolute w-[440px] h-[440px] rounded-full bg-cyan-500/5 border border-cyan-500/10 animate-pulse pointer-events-none" />
+            <div className="absolute w-[240px] h-[240px] sm:w-[320px] sm:h-[320px] md:w-[360px] md:h-[360px] rounded-full bg-purple-500/5 border border-purple-500/10 animate-ping pointer-events-none" style={{ animationDuration: '6s' }} />
+            <div className="absolute w-[300px] h-[300px] sm:w-[380px] sm:h-[380px] md:w-[440px] md:h-[440px] rounded-full bg-cyan-500/5 border border-cyan-500/10 animate-pulse pointer-events-none" />
 
             {/* Main Transparent Professional Image Container */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
-              className="relative z-10 w-[420px] h-[420px] rounded-full overflow-hidden bg-gradient-to-b from-purple-500/10 via-slate-900/40 to-slate-950/30 border border-white/10 shadow-2xl flex items-center justify-center"
+              className="relative z-10 w-[270px] h-[270px] sm:w-[340px] sm:h-[340px] md:w-[420px] md:h-[420px] rounded-full overflow-hidden bg-gradient-to-b from-purple-500/10 via-slate-900/40 to-slate-950/30 border border-white/10 shadow-2xl flex items-center justify-center"
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.15),transparent_60%)] rounded-full" />
               <img 
@@ -277,36 +288,40 @@ export default function Home() {
             </motion.div>
 
             {/* Surrounding Floating UI Elements */}
-            {floatingCards.map((card, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: 0, y: 0 }}
-                animate={{ 
-                  opacity: 1,
-                  x: card.x,
-                  y: card.y,
-                  y: [card.y - 10, card.y + 10, card.y - 10]
-                }}
-                transition={{
-                  opacity: { duration: 0.6, delay: card.delay },
-                  x: { duration: 0.6, delay: card.delay },
-                  y: { 
-                    repeat: Infinity,
-                    duration: 4 + (i % 3),
-                    ease: "easeInOut"
-                  }
-                }}
-                className={`absolute z-20 px-3.5 py-2 rounded-2xl border border-white/25 text-xs font-bold text-white flex items-center gap-1.5 cursor-default hover:scale-105 transition-all duration-300`}
-                style={{
-                  background: card.bg,
-                  backgroundSize: '200% auto',
-                  boxShadow: `0 4px 20px ${card.shadow}`
-                }}
-              >
-                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                {card.text}
-              </motion.div>
-            ))}
+            {floatingCards.map((card, i) => {
+              const scaleFactor = isMobile ? 0.55 : isTablet ? 0.75 : 1.0;
+              const targetX = card.x * scaleFactor;
+              const targetY = card.y * scaleFactor;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: 0, y: 0 }}
+                  animate={{ 
+                    opacity: 1,
+                    x: targetX,
+                    y: [targetY - 8, targetY + 8, targetY - 8]
+                  }}
+                  transition={{
+                    opacity: { duration: 0.6, delay: card.delay },
+                    x: { duration: 0.6, delay: card.delay },
+                    y: { 
+                      repeat: Infinity,
+                      duration: 4 + (i % 3),
+                      ease: "easeInOut"
+                    }
+                  }}
+                  className={`absolute z-20 px-2 py-1 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl border border-white/20 text-[9px] sm:text-xs font-bold text-white flex items-center gap-1.5 cursor-default hover:scale-105 transition-all duration-300`}
+                  style={{
+                    background: card.bg,
+                    backgroundSize: '200% auto',
+                    boxShadow: `0 4px 15px ${card.shadow}`
+                  }}
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  {card.text}
+                </motion.div>
+              );
+            })}
           </div>
 
         </div>
