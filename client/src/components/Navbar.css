@@ -206,8 +206,8 @@
   cursor: pointer;
 }
 
-/* Mobile */
-@media (max-width: 768px) {
+/* Mobile & Tablet Drawer Breakpoint */
+@media (max-width: 1024px) {
   .hamburger {
     display: flex;
   }
