@@ -13,11 +13,19 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        await syncUserWithBackend(currentUser);
+        await fetchProfile(currentUser);
+      } else {
+        setProfile(null);
+      }
       setLoading(false);
     });
     return unsubscribe;
@@ -28,6 +36,7 @@ export function AuthProvider({ children }) {
       const result = await signInWithPopup(auth, googleProvider);
       // Sync user with backend
       await syncUserWithBackend(result.user);
+      await fetchProfile(result.user);
       return { success: true, user: result.user };
     } catch (error) {
       console.error('Google sign-in error:', error);
@@ -39,6 +48,7 @@ export function AuthProvider({ children }) {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       await syncUserWithBackend(result.user);
+      await fetchProfile(result.user);
       return { success: true, user: result.user };
     } catch (error) {
       let message = 'Login failed. Please try again.';
@@ -54,6 +64,7 @@ export function AuthProvider({ children }) {
       const result = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(result.user, { displayName: name });
       await syncUserWithBackend(result.user);
+      await fetchProfile(result.user);
       return { success: true, user: result.user };
     } catch (error) {
       let message = 'Sign up failed. Please try again.';
@@ -66,6 +77,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await signOut(auth);
+      setProfile(null);
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };
@@ -75,7 +87,6 @@ export function AuthProvider({ children }) {
   const syncUserWithBackend = async (firebaseUser) => {
     try {
       const token = await firebaseUser.getIdToken();
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       await fetch(`${apiUrl}/auth/google`, {
         method: 'POST',
         headers: {
@@ -93,6 +104,23 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const fetchProfile = async (firebaseUser = user) => {
+    try {
+      if (!firebaseUser) return null;
+      const token = await firebaseUser.getIdToken();
+      const res = await fetch(`${apiUrl}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      setProfile(data);
+      return data;
+    } catch (error) {
+      console.log('Profile fetch skipped:', error.message);
+      return null;
+    }
+  };
+
   const getToken = async () => {
     if (user) {
       return await user.getIdToken();
@@ -102,12 +130,14 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
+    profile,
     loading,
     signInWithGoogle,
     loginWithEmail,
     signUpWithEmail,
     logout,
-    getToken
+    getToken,
+    fetchProfile
   };
 
   return (

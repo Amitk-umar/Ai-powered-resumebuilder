@@ -11,7 +11,10 @@ import {
   HiClock,
   HiChartBar,
   HiCheckCircle,
-  HiExclamationCircle
+  HiExclamationCircle,
+  HiCreditCard,
+  HiDownload,
+  HiSparkles
 } from 'react-icons/hi';
 import './Dashboard.css';
 
@@ -19,6 +22,8 @@ export default function Dashboard() {
   const { user, getToken } = useAuth();
   const [resumes, setResumes] = useState([]);
   const [screenings, setScreenings] = useState([]);
+  const [planInfo, setPlanInfo] = useState(null);
+  const [companies, setCompanies] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -37,9 +42,11 @@ export default function Dashboard() {
       };
 
       // Fetch both in parallel
-      const [resumesRes, screeningsRes] = await Promise.all([
+      const [resumesRes, screeningsRes, planRes, companiesRes] = await Promise.all([
         fetch(`${apiUrl}/resumes`, { headers }).catch(() => null),
-        fetch(`${apiUrl}/screenings`, { headers }).catch(() => null)
+        fetch(`${apiUrl}/screenings`, { headers }).catch(() => null),
+        fetch(`${apiUrl}/plans/me`, { headers }).catch(() => null),
+        fetch(`${apiUrl}/plans/companies`, { headers }).catch(() => null)
       ]);
 
       if (resumesRes?.ok) {
@@ -51,10 +58,33 @@ export default function Dashboard() {
         const data = await screeningsRes.json();
         setScreenings(data);
       }
+
+      if (planRes?.ok) setPlanInfo(await planRes.json());
+      if (companiesRes?.ok) setCompanies(await companiesRes.json());
     } catch (err) {
       console.log('Could not fetch dashboard data:', err.message);
     }
     setLoadingData(false);
+  };
+
+  const requestPlan = async (requestedPlan) => {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiUrl}/plans/request`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ requestedPlan })
+      });
+      const data = await res.json();
+      if (!res.ok) return alert(data.error || 'Could not request plan');
+      alert('Upgrade request sent to admin.');
+      fetchDashboardData();
+    } catch (err) {
+      alert('Could not request plan: ' + err.message);
+    }
   };
 
   const deleteResume = async (id) => {
@@ -114,6 +144,34 @@ export default function Dashboard() {
               <h1>Welcome back, <span className="gradient-text">{user?.displayName || 'User'}</span></h1>
               <p>{user?.email}</p>
             </div>
+          </div>
+        </div>
+
+        {/* Plan */}
+        <div className="plan-card glass-card fade-in-up delay-1">
+          <div className="plan-main">
+            <div className="dash-stat-icon" style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}>
+              <HiCreditCard />
+            </div>
+            <div>
+              <span className="plan-label">Active Plan</span>
+              <h2>{planInfo?.plan?.label || 'Basic'}</h2>
+              <p>{planInfo?.plan?.resumeLimitText || '3 resumes total'} • PDF download • Screening history</p>
+              {planInfo?.userPlan?.expiresAt && (
+                <small>Valid till {new Date(planInfo.userPlan.expiresAt).toLocaleDateString()}</small>
+              )}
+              {planInfo?.pendingRequest && (
+                <small className="pending-text">Pending admin approval for {planInfo.pendingRequest.requestedPlan}</small>
+              )}
+            </div>
+          </div>
+          <div className="plan-actions">
+            <button className="btn btn-secondary btn-sm" disabled={!!planInfo?.pendingRequest} onClick={() => requestPlan('pro')}>
+              Upgrade Pro
+            </button>
+            <button className="btn btn-primary btn-sm" disabled={!!planInfo?.pendingRequest} onClick={() => requestPlan('premium')}>
+              Upgrade Premium
+            </button>
           </div>
         </div>
 
@@ -212,6 +270,23 @@ export default function Dashboard() {
           </div>
         )}
 
+        {companies.length > 0 && (
+          <div className="dashboard-companies fade-in-up delay-3">
+            <div className="resumes-header">
+              <h2><HiSparkles /> Companies Hiring For Your Skills</h2>
+            </div>
+            <div className="company-grid">
+              {companies.slice(0, 4).map(company => (
+                <div className="company-card glass-card" key={company.name}>
+                  <h4>{company.name}</h4>
+                  <p>{company.role}</p>
+                  <small>Matches: {company.match}</small>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Resume List */}
         <div className="dashboard-resumes fade-in-up delay-3">
           <div className="resumes-header">
@@ -244,6 +319,9 @@ export default function Dashboard() {
                   <div className="resume-item-actions">
                     <Link to={`/builder?id=${resume._id}`} className="btn btn-ghost btn-sm" title="Edit">
                       <HiPencil />
+                    </Link>
+                    <Link to={`/builder?id=${resume._id}&preview=1`} className="btn btn-ghost btn-sm" title="View PDF">
+                      <HiDownload />
                     </Link>
                     <button className="btn btn-ghost btn-sm" title="Delete" onClick={() => deleteResume(resume._id)}>
                       <HiTrash />

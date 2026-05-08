@@ -10,16 +10,22 @@ exports.googleAuth = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    const updateData = {
+      firebaseUid,
+      name: name || email.split('@')[0],
+      email,
+      avatar: avatar || ''
+    };
+
+    if (process.env.ADMIN_EMAIL && email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase()) {
+      updateData.role = 'admin';
+    }
+
     // Upsert user: find by firebaseUid OR email, update or create
     let user = await User.findOneAndUpdate(
       { $or: [{ firebaseUid }, { email }] },
       {
-        $set: {
-          firebaseUid,
-          name: name || email.split('@')[0],
-          email,
-          avatar: avatar || ''
-        }
+        $set: updateData
       },
       { upsert: true, new: true, runValidators: true }
     );
@@ -31,7 +37,8 @@ exports.googleAuth = async (req, res) => {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
-        role: user.role
+        role: user.role,
+        plan: user.plan
       }
     });
   } catch (error) {
@@ -54,6 +61,7 @@ exports.getMe = async (req, res) => {
       email: user.email,
       avatar: user.avatar,
       role: user.role,
+      plan: user.plan,
       screeningsCount: user.screeningsCount,
       createdAt: user.createdAt
     });

@@ -17,6 +17,8 @@ export default function Home() {
   const [isYearly, setIsYearly] = useState(false);
   const [faqOpen, setFaqOpen] = useState({});
   const [atsStep, setAtsStep] = useState(0);
+  const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [contactStatus, setContactStatus] = useState('');
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
   useEffect(() => {
@@ -61,6 +63,28 @@ export default function Home() {
       ...prev,
       [index]: !prev[index]
     }));
+  };
+
+  const updateContact = (field, value) => {
+    setContactForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const submitContact = async (e) => {
+    e.preventDefault();
+    setContactStatus('Sending...');
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const res = await fetch(`${apiUrl}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactForm)
+      });
+      if (!res.ok) throw new Error('Could not send message');
+      setContactForm({ name: '', email: '', subject: '', message: '' });
+      setContactStatus('Message sent successfully.');
+    } catch (error) {
+      setContactStatus('Message could not be sent right now.');
+    }
   };
 
   const logos = [
@@ -838,6 +862,31 @@ export default function Home() {
               Get Started For Free <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* --- CONTACT SECTION --- */}
+      <section className="py-20 relative z-10 px-6 border-t border-white/5">
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-10">
+            <span className="text-xs font-bold text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">Contact Us</span>
+            <h2 className="text-3xl md:text-5xl font-extrabold mt-4 text-white tracking-tight">Need Help With Your Resume?</h2>
+            <p className="text-slate-400 mt-4">Send your question to the team. Admin can review every message from the dashboard.</p>
+          </div>
+          <form className="premium-glass p-6 md:p-8 contact-form" onSubmit={submitContact}>
+            <div className="contact-grid">
+              <input className="form-input" placeholder="Your name" value={contactForm.name} onChange={e => updateContact('name', e.target.value)} required />
+              <input className="form-input" type="email" placeholder="Email address" value={contactForm.email} onChange={e => updateContact('email', e.target.value)} required />
+            </div>
+            <input className="form-input" placeholder="Subject" value={contactForm.subject} onChange={e => updateContact('subject', e.target.value)} />
+            <textarea className="form-input form-textarea" rows="5" placeholder="Write your message..." value={contactForm.message} onChange={e => updateContact('message', e.target.value)} required />
+            <div className="contact-submit-row">
+              <button className="px-6 py-3 rounded-2xl font-bold premium-btn-primary flex items-center gap-2" type="submit">
+                <Send className="w-4 h-4" /> Send Message
+              </button>
+              {contactStatus && <span>{contactStatus}</span>}
+            </div>
+          </form>
         </div>
       </section>
 

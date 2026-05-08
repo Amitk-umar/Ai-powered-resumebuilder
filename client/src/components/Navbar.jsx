@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
-import { HiMenu, HiX, HiUser, HiLogout, HiDocumentText, HiViewGrid, HiSearch, HiHome } from 'react-icons/hi';
+import { HiMenu, HiX, HiLogout, HiDocumentText, HiViewGrid, HiSearch, HiHome, HiChartBar } from 'react-icons/hi';
 import './Navbar.css';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -28,6 +28,10 @@ export default function Navbar() {
       { path: '/dashboard', label: 'Dashboard', icon: <HiViewGrid /> },
       { path: '/screener', label: 'AI Screener', icon: <HiSearch /> }
     );
+  }
+
+  if (profile?.role === 'admin') {
+    navLinks.push({ path: '/admin', label: 'Admin', icon: <HiChartBar /> });
   }
 
   return (
@@ -95,6 +99,11 @@ export default function Navbar() {
                   <Link to="/dashboard" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
                     <HiViewGrid /> Dashboard
                   </Link>
+                  {profile?.role === 'admin' && (
+                    <Link to="/admin" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                      <HiChartBar /> Admin Dashboard
+                    </Link>
+                  )}
                   <button className="dropdown-item logout" onClick={handleLogout}>
                     <HiLogout /> Logout
                   </button>

@@ -28,6 +28,26 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'recruiter', 'admin'],
     default: 'user'
   },
+  plan: {
+    name: {
+      type: String,
+      enum: ['basic', 'pro', 'premium'],
+      default: 'basic'
+    },
+    status: {
+      type: String,
+      enum: ['active', 'expired'],
+      default: 'active'
+    },
+    startedAt: {
+      type: Date,
+      default: Date.now
+    },
+    expiresAt: {
+      type: Date,
+      default: null
+    }
+  },
   resumes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Resume'

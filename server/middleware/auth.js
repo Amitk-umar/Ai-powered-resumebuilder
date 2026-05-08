@@ -47,7 +47,19 @@ const adminOnly = (req, res, next) => {
   if (!req.user) {
     return res.status(403).json({ error: 'Access denied' });
   }
-  next();
+  const User = require('../models/User');
+  User.findOne({ firebaseUid: req.user.uid })
+    .then(user => {
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access only' });
+      }
+      req.dbUser = user;
+      next();
+    })
+    .catch(error => {
+      console.error('Admin check error:', error);
+      res.status(500).json({ error: 'Server error' });
+    });
 };
 
 module.exports = { authMiddleware, adminOnly };

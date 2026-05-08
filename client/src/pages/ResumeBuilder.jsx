@@ -27,10 +27,12 @@ const emptyResume = {
 };
 
 export default function ResumeBuilder() {
-  const { user } = useAuth();
+  const { user, getToken } = useAuth();
   const [step, setStep] = useState(0);
   const [template, setTemplate] = useState('Modern');
-  const [showPreview, setShowPreview] = useState(false);
+  const [planTemplates, setPlanTemplates] = useState(TEMPLATES);
+  const [saving, setSaving] = useState(false);
+  const [showPreview, setShowPreview] = useState(() => new URLSearchParams(window.location.search).get('preview') === '1');
   const [data, setData] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
@@ -45,6 +47,53 @@ export default function ResumeBuilder() {
     return { ...emptyResume };
   });
   const previewRef = useRef(null);
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+  useEffect(() => {
+    if (user) {
+      loadPlan();
+      loadResumeFromServer();
+    }
+  }, [user]);
+
+  const toFormData = (resume) => ({
+    personal: resume.personalInfo || emptyResume.personal,
+    education: resume.education?.length ? resume.education : emptyResume.education,
+    experience: resume.experience?.length ? resume.experience : emptyResume.experience,
+    skills: resume.skills || emptyResume.skills,
+    projects: resume.projects?.length ? resume.projects : emptyResume.projects
+  });
+
+  const loadPlan = async () => {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiUrl}/plans/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const info = await res.json();
+      setPlanTemplates(info.plan?.templates || TEMPLATES);
+    } catch (error) {
+      console.log('Plan load skipped:', error.message);
+    }
+  };
+
+  const loadResumeFromServer = async () => {
+    const id = new URLSearchParams(window.location.search).get('id');
+    if (!id || id.length < 20) return;
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiUrl}/resumes/${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const resume = await res.json();
+      setTemplate(resume.template || 'Modern');
+      setData(toFormData(resume));
+    } catch (error) {
+      console.log('Resume load skipped:', error.message);
+    }
+  };
 
   const updatePersonal = (field, value) => {
     setData(prev => ({ ...prev, personal: { ...prev.personal, [field]: value } }));
@@ -79,14 +128,49 @@ export default function ResumeBuilder() {
     setData(prev => ({ ...prev, skills: { ...prev.skills, [field]: value } }));
   };
 
-  const saveResume = () => {
+  const saveResume = async () => {
     const params = new URLSearchParams(window.location.search);
     const existingId = params.get('id');
+    setSaving(true);
+    const payload = {
+      title: data.personal.name ? `${data.personal.name}'s Resume` : 'Untitled Resume',
+      template,
+      personalInfo: data.personal,
+      education: data.education,
+      experience: data.experience,
+      skills: data.skills,
+      projects: data.projects
+    };
+
+    try {
+      const token = await getToken();
+      const isServerId = existingId && existingId.length >= 20;
+      const res = await fetch(`${apiUrl}/resumes${isServerId ? `/${existingId}` : ''}`, {
+        method: isServerId ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const saved = await res.json();
+      if (!res.ok) {
+        alert(saved.error || 'Could not save resume.');
+        setSaving(false);
+        return;
+      }
+      window.history.replaceState({}, '', `/builder?id=${saved._id}`);
+      alert('Resume saved successfully!');
+      setSaving(false);
+      return;
+    } catch (error) {
+      console.log('Server save failed, saving locally:', error.message);
+    }
+
     const resumes = JSON.parse(localStorage.getItem('resumeai-resumes') || '[]');
     const resumeObj = {
       id: existingId || Date.now().toString(),
-      title: data.personal.name ? `${data.personal.name}'s Resume` : 'Untitled Resume',
-      template,
+      ...payload,
       data,
       updatedAt: new Date().toISOString()
     };
@@ -103,6 +187,7 @@ export default function ResumeBuilder() {
 
     localStorage.setItem('resumeai-resumes', JSON.stringify(resumes));
     alert('Resume saved successfully!');
+    setSaving(false);
   };
 
   const exportPDF = async () => {
@@ -136,7 +221,7 @@ export default function ResumeBuilder() {
           </div>
           <div className="builder-header-actions">
             <div className="template-selector">
-              {TEMPLATES.map(t => (
+              {planTemplates.map(t => (
                 <button
                   key={t}
                   className={`template-btn ${template === t ? 'active' : ''}`}
@@ -383,8 +468,8 @@ export default function ResumeBuilder() {
                   <HiArrowLeft /> Previous
                 </button>
                 <div className="form-nav-right">
-                  <button className="btn btn-secondary" onClick={saveResume}>
-                    <HiSave /> Save
+                  <button className="btn btn-secondary" onClick={saveResume} disabled={saving}>
+                    <HiSave /> {saving ? 'Saving...' : 'Save'}
                   </button>
                   {step < STEPS.length - 1 ? (
                     <button className="btn btn-primary" onClick={() => setStep(step + 1)}>
@@ -403,13 +488,165 @@ export default function ResumeBuilder() {
           {/* Preview */}
           <div className={`builder-preview ${showPreview ? 'show-mobile' : ''}`}>
             <div className="preview-wrapper glass-card fade-in-up delay-3">
-              <div ref={previewRef} className={`resume-preview template-${template.toLowerCase()}`}>
-                <ResumePreviewContent data={data} template={template} />
+              <div ref={previewRef} className={`resume-preview template-${getTemplateClass(template)}`}>
+                <ResumePreviewContentV2 data={data} template={template} />
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function getTemplateClass(template) {
+  return template.toLowerCase().replace(/\s+/g, '-');
+}
+
+function ResumePreviewContentV2({ data, template }) {
+  const formatDate = (d) => {
+    if (!d) return '';
+    const [y, m] = d.split('-');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[parseInt(m) - 1]} ${y}`;
+  };
+
+  const skillList = (s) => s ? s.split(',').map(x => x.trim()).filter(Boolean) : [];
+  const hasSkills = data.skills.technical || data.skills.soft || data.skills.tools || data.skills.languages;
+  const isSkillsFirst = template === 'ATS Focused' || template === 'Technical';
+  const isTechnical = template === 'Technical';
+
+  const SectionTitle = ({ children }) => (
+    <h2 className="preview-section-title">{children}</h2>
+  );
+
+  const SkillsSection = () => hasSkills && (
+    <div className={`preview-section ${isSkillsFirst ? 'preview-priority-section' : ''}`}>
+      <SectionTitle>{template === 'ATS Focused' ? 'Keyword Skills' : 'Skills'}</SectionTitle>
+      <div className={isTechnical ? 'preview-skill-tags' : 'preview-skills'}>
+        {data.skills.technical && (
+          isTechnical ? skillList(data.skills.technical).map(skill => <span key={skill}>{skill}</span>) : (
+            <div className="preview-skill-group">
+              <strong>Technical:</strong> {data.skills.technical}
+            </div>
+          )
+        )}
+        {!isTechnical && data.skills.soft && (
+          <div className="preview-skill-group">
+            <strong>Soft Skills:</strong> {data.skills.soft}
+          </div>
+        )}
+        {!isTechnical && data.skills.tools && (
+          <div className="preview-skill-group">
+            <strong>Tools:</strong> {data.skills.tools}
+          </div>
+        )}
+        {!isTechnical && data.skills.languages && (
+          <div className="preview-skill-group">
+            <strong>Languages:</strong> {data.skills.languages}
+          </div>
+        )}
+      </div>
+      {isTechnical && (data.skills.tools || data.skills.languages || data.skills.soft) && (
+        <div className="preview-skills technical-extra-skills">
+          {data.skills.tools && <div className="preview-skill-group"><strong>Tools:</strong> {data.skills.tools}</div>}
+          {data.skills.languages && <div className="preview-skill-group"><strong>Languages:</strong> {data.skills.languages}</div>}
+          {data.skills.soft && <div className="preview-skill-group"><strong>Professional:</strong> {data.skills.soft}</div>}
+        </div>
+      )}
+    </div>
+  );
+
+  const ExperienceSection = () => data.experience.some(e => e.company) && (
+    <div className="preview-section">
+      <SectionTitle>{template === 'Executive' ? 'Leadership Experience' : 'Work Experience'}</SectionTitle>
+      {data.experience.filter(e => e.company).map((exp, i) => (
+        <div key={i} className="preview-entry">
+          <div className="preview-entry-header">
+            <div>
+              <strong>{exp.position}</strong>
+              <span className="preview-company">{exp.company}</span>
+            </div>
+            <span className="preview-date">
+              {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}
+            </span>
+          </div>
+          {exp.description && (
+            <div className="preview-description">
+              {exp.description.split('\n').map((line, j) => (
+                <p key={j}>{line}</p>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  const EducationSection = () => data.education.some(e => e.institution) && (
+    <div className="preview-section">
+      <SectionTitle>Education</SectionTitle>
+      {data.education.filter(e => e.institution).map((edu, i) => (
+        <div key={i} className="preview-entry">
+          <div className="preview-entry-header">
+            <div>
+              <strong>{edu.degree}{edu.field ? ` in ${edu.field}` : ''}</strong>
+              <span className="preview-company">{edu.institution}</span>
+            </div>
+            <span className="preview-date">
+              {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
+              {edu.gpa ? ` | GPA: ${edu.gpa}` : ''}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const ProjectsSection = () => data.projects.some(p => p.name) && (
+    <div className="preview-section">
+      <SectionTitle>{isTechnical ? 'Technical Projects' : 'Projects'}</SectionTitle>
+      {data.projects.filter(p => p.name).map((proj, i) => (
+        <div key={i} className="preview-entry">
+          <div className="preview-entry-header">
+            <div>
+              <strong>{proj.name}</strong>
+              {proj.technologies && <span className="preview-tech">{proj.technologies}</span>}
+            </div>
+            {proj.link && <span className="preview-date">{proj.link}</span>}
+          </div>
+          {proj.description && <p className="preview-description">{proj.description}</p>}
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="preview-content">
+      <div className="preview-header">
+        <h1 className="preview-name">{data.personal.name || 'Your Name'}</h1>
+        <div className="preview-contact">
+          {data.personal.email && <span>{data.personal.email}</span>}
+          {data.personal.phone && <span>{data.personal.phone}</span>}
+          {data.personal.location && <span>{data.personal.location}</span>}
+          {data.personal.linkedin && <span>{data.personal.linkedin}</span>}
+          {data.personal.website && <span>{data.personal.website}</span>}
+        </div>
+      </div>
+
+      {data.personal.summary && (
+        <div className="preview-section">
+          <SectionTitle>{template === 'Executive' ? 'Executive Profile' : 'Professional Summary'}</SectionTitle>
+          <p className="preview-summary">{data.personal.summary}</p>
+        </div>
+      )}
+
+      {isSkillsFirst && <SkillsSection />}
+      <ExperienceSection />
+      {isTechnical && <ProjectsSection />}
+      {!isSkillsFirst && <SkillsSection />}
+      <EducationSection />
+      {!isTechnical && <ProjectsSection />}
     </div>
   );
 }

@@ -388,6 +388,139 @@
   border-bottom-color: #eee;
 }
 
+.template-creative {
+  padding: 34px 38px;
+  border-top: 8px solid #0f766e;
+}
+
+.template-creative .preview-header {
+  text-align: left;
+  border-bottom: 1px solid #0f766e;
+}
+
+.template-creative .preview-name {
+  color: #0f766e;
+  letter-spacing: 0;
+}
+
+.template-creative .preview-contact {
+  justify-content: flex-start;
+}
+
+.template-creative .preview-section-title {
+  color: #0f766e;
+  border-bottom-color: #99f6e4;
+  letter-spacing: 0;
+}
+
+.template-creative .preview-entry {
+  border-left: 2px solid #ccfbf1;
+  padding-left: 10px;
+}
+
+.template-executive {
+  padding: 38px 42px;
+}
+
+.template-executive .preview-header {
+  text-align: left;
+  border-bottom: 3px double #111827;
+}
+
+.template-executive .preview-name {
+  font-size: 22pt;
+  letter-spacing: 0;
+}
+
+.template-executive .preview-contact {
+  justify-content: flex-start;
+}
+
+.template-executive .preview-section-title {
+  color: #111827;
+  border-bottom: 2px solid #111827;
+  letter-spacing: 0;
+}
+
+.template-executive .preview-summary {
+  font-size: 10pt;
+  border-left: 3px solid #111827;
+  padding-left: 10px;
+}
+
+.template-ats-focused {
+  padding: 32px 38px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.template-ats-focused .preview-header {
+  text-align: left;
+  border-bottom: 2px solid #111;
+}
+
+.template-ats-focused .preview-name {
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: 0;
+}
+
+.template-ats-focused .preview-contact {
+  justify-content: flex-start;
+}
+
+.template-ats-focused .preview-section-title {
+  color: #111;
+  border-bottom: 1px solid #111;
+  letter-spacing: 0;
+}
+
+.template-ats-focused .preview-priority-section {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+}
+
+.template-technical .preview-header {
+  text-align: left;
+  border-bottom-color: #0f172a;
+}
+
+.template-technical .preview-name {
+  color: #0f172a;
+  letter-spacing: 0;
+}
+
+.template-technical .preview-contact {
+  justify-content: flex-start;
+}
+
+.template-technical .preview-section-title {
+  color: #0f172a;
+  border-bottom-color: #0f172a;
+  letter-spacing: 0;
+}
+
+.preview-skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.preview-skill-tags span {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  border-radius: 3px;
+  padding: 3px 7px;
+  font-size: 8.5pt;
+  line-height: 1.2;
+}
+
+.technical-extra-skills {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 7px;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .builder-content {

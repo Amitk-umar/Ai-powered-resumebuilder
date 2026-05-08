@@ -99,6 +99,52 @@
   margin-bottom: var(--space-xl);
 }
 
+.plan-card {
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.plan-card:hover { transform: none; }
+
+.plan-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.plan-label {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.plan-main h2 {
+  font-size: 1.35rem;
+  margin: 2px 0;
+}
+
+.plan-main p,
+.plan-main small {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.pending-text {
+  display: block;
+  color: var(--warning) !important;
+  margin-top: 3px;
+}
+
+.plan-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .action-card {
   padding: var(--space-xl);
   display: flex;
@@ -212,6 +258,42 @@
   margin-bottom: var(--space-xl);
 }
 
+.dashboard-companies {
+  margin-bottom: var(--space-xl);
+}
+
+.dashboard-companies .resumes-header h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.company-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+}
+
+.company-card {
+  padding: var(--space-lg);
+}
+
+.company-card:hover { transform: none; }
+
+.company-card h4 {
+  margin-bottom: 4px;
+}
+
+.company-card p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.company-card small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
 .screenings-list {
   display: flex;
   flex-direction: column;
@@ -271,6 +353,16 @@
   }
 
   .dashboard-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-card,
+  .plan-main {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .company-grid {
     grid-template-columns: 1fr;
   }
 
