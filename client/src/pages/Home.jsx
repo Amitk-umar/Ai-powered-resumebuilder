@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Sparkles, Cpu, FileText, CheckCircle, TrendingUp, 
-  Award, Search, ArrowRight, Play, Check, Plus, Minus, 
-  Star, ChevronDown, Briefcase, BarChart, ShieldCheck, 
+import {
+  Sparkles, Cpu, FileText, CheckCircle, TrendingUp,
+  Award, Search, ArrowRight, Play, Check, Plus, Minus,
+  Star, ChevronDown, Briefcase, BarChart, ShieldCheck,
   HelpCircle, Zap, RefreshCw, Send, Users, Globe, Smile
 } from 'lucide-react';
 import { FaLinkedin } from 'react-icons/fa';
@@ -37,7 +37,7 @@ export default function Home() {
     if (isAtsScanning) return;
     setIsAtsScanning(true);
     setAtsStep(1);
-    
+
     const timers = [
       setTimeout(() => setAtsStep(2), 1200),
       setTimeout(() => setAtsStep(3), 2400),
@@ -87,8 +87,15 @@ export default function Home() {
     }
   };
 
-  const logos = [
-    'Google', 'Microsoft', 'Meta', 'Amazon', 'Apple', 'Netflix', 'Stripe', 'Airbnb'
+  const brands = [
+    { name: 'Airbnb', image: '/brand-images/Airbnb_Logo.webp' },
+    { name: 'Amazon', image: '/brand-images/Amazon_logo.webp' },
+    { name: 'Google', image: '/brand-images/Google_Logo.webp' },
+    { name: 'Meta', image: '/brand-images/Meta-Logo.webp' },
+    { name: 'Netflix', image: '/brand-images/Netflix_Logo.webp' },
+    { name: 'Stripe', image: '/brand-images/Stripe_Logo.webp' },
+    { name: 'Apple', image: '/brand-images/apple-Logo.webp' },
+    { name: 'Microsoft', image: '/brand-images/microsoft-logo.webp' }
   ];
 
   const bentoFeatures = [
@@ -220,10 +227,10 @@ export default function Home() {
       <section className="relative pt-20 pb-20 md:pt-24 md:pb-28 z-10">
         <div className="hero-grid-overlay" />
         <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+
           {/* Left Hero Side */}
           <div className="lg:col-span-6 flex flex-col gap-6 text-left relative z-10">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -233,7 +240,7 @@ export default function Home() {
               <span>Next-Gen Career Optimization Engine</span>
             </motion.div>
 
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
@@ -242,7 +249,7 @@ export default function Home() {
               Land More Interviews with <span className="gradient-text bg-gradient-to-r from-purple-400 via-violet-500 to-cyan-400 bg-clip-text text-transparent">AI-Powered</span> Resume Optimization
             </motion.h1>
 
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -251,7 +258,7 @@ export default function Home() {
               Instantly bypass ATS screening software, optimize missing keyword gaps, leverage real-time AI bullet enhancements, and build a career profile that commands industry attention.
             </motion.p>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -266,7 +273,7 @@ export default function Home() {
             </motion.div>
 
             {/* Badges */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
@@ -294,16 +301,16 @@ export default function Home() {
             <div className="absolute w-[300px] h-[300px] sm:w-[380px] sm:h-[380px] md:w-[440px] md:h-[440px] rounded-full bg-cyan-500/5 border border-cyan-500/10 animate-pulse pointer-events-none" />
 
             {/* Main Transparent Professional Image Container */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
               className="relative z-10 w-[270px] h-[270px] sm:w-[340px] sm:h-[340px] md:w-[420px] md:h-[420px] rounded-full overflow-hidden bg-gradient-to-b from-purple-500/10 via-slate-900/40 to-slate-950/30 border border-white/10 shadow-2xl flex items-center justify-center"
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.15),transparent_60%)] rounded-full" />
-              <img 
-                src="/professional.png" 
-                alt="Job Ready Tech Professional" 
+              <img
+                src="/professional.png"
+                alt="Job Ready Tech Professional"
                 className="w-[88%] h-[88%] object-contain relative z-10 transform hover:scale-105 transition-transform duration-700 pointer-events-auto"
                 onError={(e) => {
                   e.target.src = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop";
@@ -320,7 +327,7 @@ export default function Home() {
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, x: 0, y: 0 }}
-                  animate={{ 
+                  animate={{
                     opacity: 1,
                     x: targetX,
                     y: [targetY - 8, targetY + 8, targetY - 8]
@@ -328,7 +335,7 @@ export default function Home() {
                   transition={{
                     opacity: { duration: 0.6, delay: card.delay },
                     x: { duration: 0.6, delay: card.delay },
-                    y: { 
+                    y: {
                       repeat: Infinity,
                       duration: 4 + (i % 3),
                       ease: "easeInOut"
@@ -351,19 +358,55 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- TRUSTED BY --- */}
-      <section className="py-12 border-t border-b border-white/5 relative z-10 overflow-hidden bg-transparent">
-        <div className="container mx-auto px-6 text-center mb-6">
-          <p className="text-xs font-semibold text-slate-500 tracking-wider uppercase">Trusted by professionals who landed jobs at</p>
+      {/* --- PREMIUM BRAND LOGO SHOWCASE --- */}
+      <section className="py-12 relative z-10 overflow-hidden">
+        <div className="container mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <p className="text-[11px] md:text-xs font-bold text-slate-400 dark:text-slate-500 tracking-[0.25em] uppercase mb-4">
+              Empowering Careers at Industry Leaders
+            </p>
+            <div className="w-12 h-0.5 bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300 dark:from-purple-500/50 dark:via-cyan-500/50 dark:to-purple-500/50 mx-auto rounded-full" />
+          </motion.div>
         </div>
-        <div className="marquee-container">
-          <div className="marquee-track">
-            {logos.concat(logos).map((logo, i) => (
-              <span key={i} className="text-2xl font-bold tracking-tight text-slate-600 dark:text-slate-500 hover:text-white transition-colors duration-300 uppercase px-4 cursor-default">
-                {logo}
-              </span>
+
+        <div className="relative w-full max-w-[1400px] mx-auto overflow-hidden border-t border-b border-[var(--glass-border)] bg-[var(--bg-primary)] py-8 h-[120px] md:h-[140px] flex items-center mt-12 mb-12 transition-colors duration-300">
+          {/* Edge Fade Masks for Smooth Infinite Scroll */}
+          <div className="absolute inset-y-0 left-0 w-24 md:w-64 bg-gradient-to-r from-[var(--bg-primary)] to-transparent z-10 pointer-events-none" />
+          <div className="absolute inset-y-0 right-0 w-24 md:w-64 bg-gradient-to-l from-[var(--bg-primary)] to-transparent z-10 pointer-events-none" />
+
+          {/* Framer Motion Auto-Scroll Track */}
+          <motion.div
+            className="flex w-max items-center gap-12 md:gap-24 px-8"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{
+              repeat: Infinity,
+              ease: "linear",
+              duration: 45,
+            }}
+          >
+            {/* Render array twice for seamless infinite scroll */}
+            {[...brands, ...brands].map((brand, i) => (
+              <div
+                key={i}
+                className="relative group shrink-0 w-[110px] h-[35px] md:w-[150px] md:h-[45px] flex items-center justify-center cursor-pointer"
+              >
+                {/* Logo Image Normalization Wrapper */}
+                <div className="relative w-full h-full flex items-center justify-center mix-blend-multiply dark:mix-blend-normal">
+                  <img
+                    src={brand.image}
+                    alt={`${brand.name} logo`}
+                    className="w-full h-full object-contain filter grayscale opacity-40 dark:opacity-50 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 group-hover:drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-500 ease-out"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -388,7 +431,7 @@ export default function Home() {
               >
                 {/* Glow overlay */}
                 <div className={`absolute inset-0 bg-gradient-to-tr ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
-                
+
                 <div>
                   <div className="mb-6 p-3 rounded-2xl bg-white/5 w-fit border border-white/10 group-hover:border-purple-500/20 transition-colors">
                     {feature.icon}
@@ -406,15 +449,15 @@ export default function Home() {
       {/* --- LIVE ATS DEMO SECTION --- */}
       <section className="py-24 relative z-10 bg-transparent border-t border-b border-white/5">
         <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+
           <div className="lg:col-span-5 flex flex-col gap-6">
             <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 w-fit">Interactive Simulator</span>
             <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight">Experience our Real-Time <span className="text-cyan-400">ATS Analyzer</span></h2>
             <p className="text-slate-300 leading-relaxed">
               Witness how recruiters index and scan resumes. Our live interactive sandbox parses incoming resumes, scores matches, lists skill omissions, and delivers instantaneous suggestions.
             </p>
-            <button 
-              onClick={runAtsScan} 
+            <button
+              onClick={runAtsScan}
               disabled={isAtsScanning}
               className="px-6 py-3.5 rounded-2xl font-bold premium-btn-primary flex items-center gap-2 w-fit disabled:opacity-50"
             >
@@ -476,7 +519,7 @@ export default function Home() {
               {/* Match Score Display */}
               <AnimatePresence>
                 {atsStep >= 4 && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0 }}
@@ -508,8 +551,8 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 steps-timeline">
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -520,7 +563,7 @@ export default function Home() {
               <p className="text-slate-400 text-sm leading-relaxed">Import your current resume in PDF or Word format, or build one fresh with our guided templates.</p>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -532,7 +575,7 @@ export default function Home() {
               <p className="text-slate-400 text-sm leading-relaxed">Input target job advertisements to parse specific technical keywords, credentials, and required skillsets.</p>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -551,8 +594,8 @@ export default function Home() {
       {/* --- STATS SECTION --- */}
       <section className="py-24 relative z-10 bg-transparent border-t border-b border-white/5">
         <div className="container mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          
-          <motion.div 
+
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -565,7 +608,7 @@ export default function Home() {
             <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Resumes Optimized</span>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -579,7 +622,7 @@ export default function Home() {
             <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Active Global Users</span>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -593,7 +636,7 @@ export default function Home() {
             <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Interview Success Rate</span>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -620,7 +663,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -641,7 +684,7 @@ export default function Home() {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -663,7 +706,7 @@ export default function Home() {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -694,11 +737,11 @@ export default function Home() {
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-bold text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">Simple Pricing</span>
             <h2 className="text-3xl md:text-5xl font-extrabold mt-4 text-white tracking-tight">Flexible Plans, <span className="gradient-text bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">No Surprises</span></h2>
-            
+
             {/* Monthly / Yearly Toggle */}
             <div className="flex items-center justify-center gap-3 mt-8">
               <span className={`text-sm ${!isYearly ? 'text-white font-bold' : 'text-slate-400'}`}>Monthly</span>
-              <button 
+              <button
                 onClick={() => setIsYearly(!isYearly)}
                 className="w-14 h-8 rounded-full bg-white/10 p-1 transition-all duration-300 relative border border-white/10"
               >
@@ -711,9 +754,9 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-5xl mx-auto">
-            
+
             {/* Free Plan */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -723,7 +766,7 @@ export default function Home() {
                 <span className="text-xs uppercase font-bold text-slate-400">Starter</span>
                 <span className="text-2xl font-extrabold text-white">Free Sandbox</span>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-4xl font-extrabold text-white">$0</span>
+                  <span className="text-4xl font-extrabold text-white">&#x20B9;0</span>
                   <span className="text-xs text-slate-400">/ forever</span>
                 </div>
                 <p className="text-slate-400 text-sm mt-2 border-b border-white/5 pb-4">Essential tools to experience AI resume building and preview score analytics.</p>
@@ -739,7 +782,7 @@ export default function Home() {
             </motion.div>
 
             {/* Pro Plan */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -751,7 +794,7 @@ export default function Home() {
                 <span className="text-xs uppercase font-bold text-purple-400">Professional</span>
                 <span className="text-2xl font-extrabold text-white">Premium Pro</span>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-4xl font-extrabold text-white">${isYearly ? '19' : '24'}</span>
+                  <span className="text-4xl font-extrabold text-white">&#x20B9;{isYearly ? '500' : '700'}</span>
                   <span className="text-xs text-slate-400">/ month</span>
                 </div>
                 <p className="text-slate-400 text-sm mt-2 border-b border-white/5 pb-4">The ultimate bundle to run tailored applications and leverage infinite AI optimizations.</p>
@@ -769,7 +812,7 @@ export default function Home() {
             </motion.div>
 
             {/* Enterprise Plan */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -780,7 +823,7 @@ export default function Home() {
                 <span className="text-xs uppercase font-bold text-slate-400">Corporate</span>
                 <span className="text-2xl font-extrabold text-white">Career Coach</span>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-4xl font-extrabold text-white">${isYearly ? '79' : '99'}</span>
+                  <span className="text-4xl font-extrabold text-white">&#x20B9;{isYearly ? '1500' : '2000'}</span>
                   <span className="text-xs text-slate-400">/ month</span>
                 </div>
                 <p className="text-slate-400 text-sm mt-2 border-b border-white/5 pb-4">Structured for colleges, corporate bootcamps, and executive job consultants.</p>
@@ -817,7 +860,7 @@ export default function Home() {
               { q: 'How do the AI rewrites avoid sounding robotic?', a: 'Unlike generic LLM blocks, our tailored prompt instructions leverage quantitative models that map real actions to measurable business impacts, creating extremely compelling professional sentences.' }
             ].map((faq, index) => (
               <div key={index} className="premium-glass overflow-hidden transition-all duration-300">
-                <button 
+                <button
                   onClick={() => toggleFaq(index)}
                   className="w-full text-left p-6 flex justify-between items-center text-white font-bold hover:text-purple-400 transition-colors"
                 >
@@ -828,7 +871,7 @@ export default function Home() {
                 </button>
                 <AnimatePresence>
                   {faqOpen[index] && (
-                    <motion.div 
+                    <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
@@ -893,7 +936,7 @@ export default function Home() {
       {/* --- FOOTER --- */}
       <footer className="premium-footer py-16 relative z-10">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          
+
           <div className="flex flex-col gap-4">
             <span className="text-xl font-bold footer-title flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-purple-400" /> NextHire<span className="gradient-text bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">AI</span>
