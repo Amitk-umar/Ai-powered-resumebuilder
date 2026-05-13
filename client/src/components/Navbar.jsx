@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
@@ -81,8 +82,19 @@ export default function Navbar() {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 {user.photoURL ? (
-                  <img src={user.photoURL} alt={user.displayName} className="user-avatar" />
-                ) : (
+                  <img
+                    src={user.photoURL}
+                    alt={user.displayName || 'User'}
+                    className="user-avatar"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      e.target.nextSibling && (e.target.nextSibling.style.display = 'flex');
+                    }}
+                  />
+                ) : null}
+                {!user.photoURL && (
                   <div className="user-avatar-fallback">
                     {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
                   </div>

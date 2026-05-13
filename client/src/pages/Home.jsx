@@ -89,13 +89,16 @@ export default function Home() {
 
   const brands = [
     { name: 'Airbnb', image: '/brand-images/Airbnb_Logo.webp' },
-    { name: 'Amazon', image: '/brand-images/Amazon_logo.webp' },
+    { name: 'Amazon', image: '/brand-images/Amazon_logo.jpg' },
     { name: 'Google', image: '/brand-images/Google_Logo.webp' },
-    { name: 'Meta', image: '/brand-images/Meta-Logo.webp' },
+    { name: 'Meta', image: '/brand-images/Meta-Logo.jpg' },
     { name: 'Netflix', image: '/brand-images/Netflix_Logo.webp' },
     { name: 'Stripe', image: '/brand-images/Stripe_Logo.webp' },
-    { name: 'Apple', image: '/brand-images/apple-Logo.webp' },
-    { name: 'Microsoft', image: '/brand-images/microsoft-logo.webp' }
+    { name: 'Apple', image: '/brand-images/apple-Logo.jpg' },
+    { name: 'Microsoft', image: '/brand-images/microsoft-logo.jpg' },
+    { name: 'Accenture', image: '/brand-images/Accenture.webp' },
+    { name: 'HDFC', image: '/brand-images/HDFC_Bank.png' },
+    { name: 'Airtel', image: '/brand-images/airtel-logo.png' }
   ];
 
   const bentoFeatures = [
@@ -224,7 +227,7 @@ export default function Home() {
       <div className="glowing-orb glow-cyan w-[500px] h-[500px] top-[100px] right-[-200px]" />
 
       {/* --- HERO SECTION --- */}
-      <section className="relative pt-20 pb-20 md:pt-24 md:pb-28 z-10">
+      <section className="relative pt-20 pb-10 md:pt-24 md:pb-14 z-10">
         <div className="hero-grid-overlay" />
         <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
@@ -359,7 +362,7 @@ export default function Home() {
       </section>
 
       {/* --- PREMIUM BRAND LOGO SHOWCASE --- */}
-      <section className="py-12 relative z-10 overflow-hidden">
+      <section className="py-6 relative z-10 overflow-hidden">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -368,16 +371,16 @@ export default function Home() {
             transition={{ duration: 0.6 }}
           >
             <p className="text-[11px] md:text-xs font-bold text-slate-400 dark:text-slate-500 tracking-[0.25em] uppercase mb-4">
-              Empowering Careers at Industry Leaders
+              Trusted by professionals who landed their dream jobs at
             </p>
             <div className="w-12 h-0.5 bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300 dark:from-purple-500/50 dark:via-cyan-500/50 dark:to-purple-500/50 mx-auto rounded-full" />
           </motion.div>
         </div>
 
-        <div className="relative w-full max-w-[1400px] mx-auto overflow-hidden border-t border-b border-[var(--glass-border)] bg-[var(--bg-primary)] py-8 h-[120px] md:h-[140px] flex items-center mt-12 mb-12 transition-colors duration-300">
+        <div className="brand-strip relative w-full max-w-[1400px] mx-auto overflow-hidden py-8 h-[120px] md:h-[140px] flex items-center mt-4 mb-4 transition-colors duration-300">
           {/* Edge Fade Masks for Smooth Infinite Scroll */}
-          <div className="absolute inset-y-0 left-0 w-24 md:w-64 bg-gradient-to-r from-[var(--bg-primary)] to-transparent z-10 pointer-events-none" />
-          <div className="absolute inset-y-0 right-0 w-24 md:w-64 bg-gradient-to-l from-[var(--bg-primary)] to-transparent z-10 pointer-events-none" />
+          <div className="brand-strip-fade-left absolute inset-y-0 left-0 w-24 md:w-64 z-10 pointer-events-none" />
+          <div className="brand-strip-fade-right absolute inset-y-0 right-0 w-24 md:w-64 z-10 pointer-events-none" />
 
           {/* Framer Motion Auto-Scroll Track */}
           <motion.div
@@ -411,7 +414,7 @@ export default function Home() {
       </section>
 
       {/* --- BENTO FEATURES SECTION --- */}
-      <section className="py-24 relative z-10">
+      <section className="py-14 relative z-10">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-bold text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">Powerful Core Features</span>
@@ -447,7 +450,7 @@ export default function Home() {
       </section>
 
       {/* --- LIVE ATS DEMO SECTION --- */}
-      <section className="py-24 relative z-10 bg-transparent border-t border-b border-white/5">
+      <section className="py-14 relative z-10 bg-transparent border-t border-b border-white/5">
         <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
           <div className="lg:col-span-5 flex flex-col gap-6">
@@ -542,7 +545,7 @@ export default function Home() {
       </section>
 
       {/* --- HOW IT WORKS SECTION --- */}
-      <section className="py-24 relative z-10">
+      <section className="py-14 relative z-10">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-bold text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">The Method</span>
@@ -592,7 +595,7 @@ export default function Home() {
       </section>
 
       {/* --- STATS SECTION --- */}
-      <section className="py-24 relative z-10 bg-transparent border-t border-b border-white/5">
+      <section className="py-14 relative z-10 bg-transparent border-t border-b border-white/5">
         <div className="container mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
           <motion.div
@@ -654,7 +657,7 @@ export default function Home() {
       </section>
 
       {/* --- TESTIMONIALS SECTION --- */}
-      <section className="py-24 relative z-10">
+      <section className="py-14 relative z-10">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-bold text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">Success Stories</span>
@@ -732,7 +735,7 @@ export default function Home() {
       </section>
 
       {/* --- PRICING SECTION --- */}
-      <section className="py-24 relative z-10 bg-transparent border-t border-b border-white/5">
+      <section className="py-14 relative z-10 bg-transparent border-t border-b border-white/5">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-bold text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">Simple Pricing</span>
@@ -844,7 +847,7 @@ export default function Home() {
       </section>
 
       {/* --- FAQ SECTION --- */}
-      <section className="py-24 relative z-10">
+      <section className="py-14 relative z-10">
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="text-center mb-16">
             <span className="text-xs font-bold text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">Help Center</span>
@@ -889,7 +892,7 @@ export default function Home() {
       </section>
 
       {/* --- FINAL CTA SECTION --- */}
-      <section className="py-24 relative z-10 px-6">
+      <section className="py-14 relative z-10 px-6">
         <div className="container mx-auto max-w-5xl premium-glass cta-card-container py-20 px-8 md:py-24 md:px-16 relative overflow-hidden text-center flex flex-col items-center gap-6 shadow-2xl">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-cyan-500/5 pointer-events-none" />
           <div className="glowing-orb glow-purple w-[250px] h-[250px] top-[-50px] left-[-50px] opacity-40" />
@@ -909,7 +912,7 @@ export default function Home() {
       </section>
 
       {/* --- CONTACT SECTION --- */}
-      <section className="py-20 relative z-10 px-6 border-t border-white/5">
+      <section className="py-14 relative z-10 px-6 border-t border-white/5">
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-10">
             <span className="text-xs font-bold text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">Contact Us</span>
@@ -968,7 +971,7 @@ export default function Home() {
           </div>
 
         </div>
-        <div className="container mx-auto px-6 border-t border-white/5 pt-8 text-center text-xs flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="container mx-auto px-6 border-t border-white/5 pt-8 text-center text-xs flex flex-col sm:flex-row justify-between items-center gap-4" style={{ marginTop: '2.5rem' }}>
           <span className="footer-text">© 2026 NextHireAI. All rights reserved. Made with ❤️ for ambitious professionals.</span>
           <div className="flex gap-4">
             <Link to="/" className="footer-link transition-colors">Privacy Policy</Link>

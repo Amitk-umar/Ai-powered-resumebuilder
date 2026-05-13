@@ -134,7 +134,13 @@ export default function Dashboard() {
         <div className="dashboard-welcome glass-card fade-in-up">
           <div className="welcome-left">
             {user?.photoURL ? (
-              <img src={user.photoURL} alt="avatar" className="welcome-avatar" />
+              <img
+                src={user.photoURL}
+                alt="avatar"
+                className="welcome-avatar"
+                referrerPolicy="no-referrer"
+                onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
+              />
             ) : (
               <div className="welcome-avatar-fallback">
                 {(user?.displayName || user?.email || 'U').charAt(0).toUpperCase()}
