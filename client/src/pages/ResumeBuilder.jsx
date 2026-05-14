@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import FloatingOrbs from '../components/FloatingOrbs';
 import {
   HiUser, HiAcademicCap, HiBriefcase, HiCode,
@@ -27,7 +28,7 @@ const emptyResume = {
 };
 
 export default function ResumeBuilder() {
-  const { user, getToken } = useAuth();
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [template, setTemplate] = useState('Modern');
   const [planTemplates, setPlanTemplates] = useState(TEMPLATES);
@@ -47,7 +48,6 @@ export default function ResumeBuilder() {
     return { ...emptyResume };
   });
   const previewRef = useRef(null);
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     if (user) {
@@ -66,10 +66,7 @@ export default function ResumeBuilder() {
 
   const loadPlan = async () => {
     try {
-      const token = await getToken();
-      const res = await fetch(`${apiUrl}/plans/me`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await api.get('/plans/me');
       if (!res.ok) return;
       const info = await res.json();
       setPlanTemplates(info.plan?.templates || TEMPLATES);
@@ -82,10 +79,7 @@ export default function ResumeBuilder() {
     const id = new URLSearchParams(window.location.search).get('id');
     if (!id || id.length < 20) return;
     try {
-      const token = await getToken();
-      const res = await fetch(`${apiUrl}/resumes/${id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await api.get(`/resumes/${id}`);
       if (!res.ok) return;
       const resume = await res.json();
       setTemplate(resume.template || 'Modern');
@@ -143,16 +137,10 @@ export default function ResumeBuilder() {
     };
 
     try {
-      const token = await getToken();
       const isServerId = existingId && existingId.length >= 20;
-      const res = await fetch(`${apiUrl}/resumes${isServerId ? `/${existingId}` : ''}`, {
-        method: isServerId ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
+      const res = isServerId
+        ? await api.put(`/resumes/${existingId}`, payload)
+        : await api.post('/resumes', payload);
       const saved = await res.json();
       if (!res.ok) {
         alert(saved.error || 'Could not save resume.');

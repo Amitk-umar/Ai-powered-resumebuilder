@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import FloatingOrbs from '../components/FloatingOrbs';
 import {
   HiUpload, HiDocumentText, HiSearch, HiChartBar,
@@ -230,7 +231,7 @@ function analyzeResumeVsJD(resumeText, jobDescription) {
 }
 
 export default function ResumeScreener() {
-  const { user, getToken } = useAuth();
+  const { user } = useAuth();
   const [file, setFile] = useState(null);
   const [jobDescription, setJobDescription] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
@@ -297,17 +298,11 @@ export default function ResumeScreener() {
 
       // Step 2: Try backend first
       try {
-        const token = await getToken();
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
         const formData = new FormData();
         formData.append('resume', file);
         formData.append('jobDescription', jobDescription);
 
-        const response = await fetch(`${apiUrl}/screen`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: formData
-        });
+        const response = await api.post('/screen', formData);
 
         if (response.ok) {
           const data = await response.json();
@@ -335,28 +330,16 @@ export default function ResumeScreener() {
   // Save screening result to MongoDB via API
   const saveScreening = async (fileName, data) => {
     try {
-      const token = await getToken();
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      console.log('Saving screening to:', `${apiUrl}/screenings`);
-      const res = await fetch(`${apiUrl}/screenings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          fileName,
-          score: data.score,
-          matchedKeywords: data.matchedKeywords || [],
-          missingKeywords: data.missingKeywords || [],
-          matchedCount: data.matchedKeywords?.length || 0,
-          missingCount: data.missingKeywords?.length || 0,
-          suggestions: data.suggestions || [],
-          formatting: data.formatting || { score: 0, issues: [] }
-        })
+      await api.post('/screenings', {
+        fileName,
+        score: data.score,
+        matchedKeywords: data.matchedKeywords || [],
+        missingKeywords: data.missingKeywords || [],
+        matchedCount: data.matchedKeywords?.length || 0,
+        missingCount: data.missingKeywords?.length || 0,
+        suggestions: data.suggestions || [],
+        formatting: data.formatting || { score: 0, issues: [] },
       });
-      const result = await res.json();
-      console.log('Screening saved:', res.status, result);
     } catch (err) {
       console.error('Could not save screening to server:', err);
     }

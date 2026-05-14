@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import FloatingOrbs from '../components/FloatingOrbs';
 import {
   HiChartBar, HiUsers, HiMail, HiDocumentText,
@@ -8,10 +9,8 @@ import {
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
-  const { getToken } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     fetchAdminData();
@@ -20,10 +19,7 @@ export default function AdminDashboard() {
   const fetchAdminData = async () => {
     setLoading(true);
     try {
-      const token = await getToken();
-      const res = await fetch(`${apiUrl}/admin/dashboard`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await api.get('/admin/dashboard');
       if (res.ok) setData(await res.json());
     } catch (error) {
       console.log('Admin dashboard error:', error.message);
@@ -32,24 +28,12 @@ export default function AdminDashboard() {
   };
 
   const updateRequest = async (id, action) => {
-    const token = await getToken();
-    const res = await fetch(`${apiUrl}/admin/plan-requests/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ action })
-    });
+    const res = await api.patch(`/admin/plan-requests/${id}`, { action });
     if (res.ok) fetchAdminData();
   };
 
   const markRead = async (id) => {
-    const token = await getToken();
-    await fetch(`${apiUrl}/admin/contacts/${id}/read`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    await api.patch(`/admin/contacts/${id}/read`, {});
     fetchAdminData();
   };
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import FloatingOrbs from '../components/FloatingOrbs';
 import {
   HiDocumentText,
@@ -19,14 +20,12 @@ import {
 import './Dashboard.css';
 
 export default function Dashboard() {
-  const { user, getToken } = useAuth();
+  const { user } = useAuth();
   const [resumes, setResumes] = useState([]);
   const [screenings, setScreenings] = useState([]);
   const [planInfo, setPlanInfo] = useState(null);
   const [companies, setCompanies] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
-
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     if (user) fetchDashboardData();
@@ -35,30 +34,15 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     setLoadingData(true);
     try {
-      const token = await getToken();
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-
-      // Fetch both in parallel
       const [resumesRes, screeningsRes, planRes, companiesRes] = await Promise.all([
-        fetch(`${apiUrl}/resumes`, { headers }).catch(() => null),
-        fetch(`${apiUrl}/screenings`, { headers }).catch(() => null),
-        fetch(`${apiUrl}/plans/me`, { headers }).catch(() => null),
-        fetch(`${apiUrl}/plans/companies`, { headers }).catch(() => null)
+        api.get('/resumes').catch(() => null),
+        api.get('/screenings').catch(() => null),
+        api.get('/plans/me').catch(() => null),
+        api.get('/plans/companies').catch(() => null),
       ]);
 
-      if (resumesRes?.ok) {
-        const data = await resumesRes.json();
-        setResumes(data);
-      }
-
-      if (screeningsRes?.ok) {
-        const data = await screeningsRes.json();
-        setScreenings(data);
-      }
-
+      if (resumesRes?.ok) setResumes(await resumesRes.json());
+      if (screeningsRes?.ok) setScreenings(await screeningsRes.json());
       if (planRes?.ok) setPlanInfo(await planRes.json());
       if (companiesRes?.ok) setCompanies(await companiesRes.json());
     } catch (err) {
@@ -69,15 +53,7 @@ export default function Dashboard() {
 
   const requestPlan = async (requestedPlan) => {
     try {
-      const token = await getToken();
-      const res = await fetch(`${apiUrl}/plans/request`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ requestedPlan })
-      });
+      const res = await api.post('/plans/request', { requestedPlan });
       const data = await res.json();
       if (!res.ok) return alert(data.error || 'Could not request plan');
       alert('Upgrade request sent to admin.');
@@ -88,25 +64,15 @@ export default function Dashboard() {
   };
 
   const deleteResume = async (id) => {
-    try {
-      const token = await getToken();
-      await fetch(`${apiUrl}/resumes/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-    } catch (err) { console.log('Delete error:', err.message); }
-    setResumes(prev => prev.filter(r => r._id !== id));
+    try { await api.delete(`/resumes/${id}`); }
+    catch (err) { console.log('Delete error:', err.message); }
+    setResumes((prev) => prev.filter((r) => r._id !== id));
   };
 
   const deleteScreening = async (id) => {
-    try {
-      const token = await getToken();
-      await fetch(`${apiUrl}/screenings/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-    } catch (err) { console.log('Delete error:', err.message); }
-    setScreenings(prev => prev.filter(s => s._id !== id));
+    try { await api.delete(`/screenings/${id}`); }
+    catch (err) { console.log('Delete error:', err.message); }
+    setScreenings((prev) => prev.filter((s) => s._id !== id));
   };
 
   // Last activity from either resumes or screenings

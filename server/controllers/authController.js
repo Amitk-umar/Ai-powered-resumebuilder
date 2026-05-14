@@ -1,72 +1,66 @@
 const User = require('../models/User');
+const ApiError = require('../utils/ApiError');
+const asyncHandler = require('../utils/asyncHandler');
 
-// POST /api/auth/google — sync Firebase user with MongoDB
-exports.googleAuth = async (req, res) => {
-  try {
-    const { name, email, avatar } = req.body;
-    const firebaseUid = req.user?.uid;
+/**
+ * POST /api/auth/google
+ * Syncs a Firebase-authenticated user with the MongoDB user record.
+ */
+exports.googleAuth = asyncHandler(async (req, res) => {
+  const { name, email, avatar } = req.body;
+  const firebaseUid = req.user?.uid;
 
-    if (!firebaseUid || !email) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
-    const updateData = {
-      firebaseUid,
-      name: name || email.split('@')[0],
-      email,
-      avatar: avatar || ''
-    };
-
-    if (process.env.ADMIN_EMAIL && email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase()) {
-      updateData.role = 'admin';
-    }
-
-    // Upsert user: find by firebaseUid OR email, update or create
-    let user = await User.findOneAndUpdate(
-      { $or: [{ firebaseUid }, { email }] },
-      {
-        $set: updateData
-      },
-      { upsert: true, new: true, runValidators: true }
-    );
-
-    res.json({
-      success: true,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        role: user.role,
-        plan: user.plan
-      }
-    });
-  } catch (error) {
-    console.error('Auth error:', error);
-    res.status(500).json({ error: 'Server error' });
+  if (!firebaseUid || !email) {
+    throw new ApiError(400, 'Missing required fields');
   }
-};
 
-// GET /api/auth/me — get current user
-exports.getMe = async (req, res) => {
-  try {
-    const user = await User.findOne({ firebaseUid: req.user.uid });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+  const updateData = {
+    firebaseUid,
+    name: name || email.split('@')[0],
+    email,
+    avatar: avatar || '',
+  };
 
-    res.json({
+  // Auto-assign admin role if the email matches the configured admin
+  if (process.env.ADMIN_EMAIL && email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase()) {
+    updateData.role = 'admin';
+  }
+
+  const user = await User.findOneAndUpdate(
+    { $or: [{ firebaseUid }, { email }] },
+    { $set: updateData },
+    { upsert: true, new: true, runValidators: true },
+  );
+
+  res.json({
+    success: true,
+    user: {
       id: user._id,
       name: user.name,
       email: user.email,
       avatar: user.avatar,
       role: user.role,
       plan: user.plan,
-      screeningsCount: user.screeningsCount,
-      createdAt: user.createdAt
-    });
-  } catch (error) {
-    console.error('Get user error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-};
+    },
+  });
+});
+
+/**
+ * GET /api/auth/me
+ * Returns the current user's profile from MongoDB.
+ */
+exports.getMe = asyncHandler(async (req, res) => {
+  const user = await User.findOne({ firebaseUid: req.user.uid });
+  if (!user) throw new ApiError(404, 'User not found');
+
+  res.json({
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar,
+    role: user.role,
+    plan: user.plan,
+    screeningsCount: user.screeningsCount,
+    createdAt: user.createdAt,
+  });
+});
