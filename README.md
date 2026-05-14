@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✦ ResumeAI
+# ✦ NextHireAI
 
 ### _Build Smarter. Get Hired Faster._
 
