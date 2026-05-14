@@ -13,7 +13,7 @@
 [![Firebase](https://img.shields.io/badge/Firebase-Auth-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
 [![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)](LICENSE)
 
-[Live Demo](#) · [Report Bug](https://github.com/Amitk-umar/Ai-powered-resumebuilder/issues) · [Request Feature](https://github.com/Amitk-umar/Ai-powered-resumebuilder/issues)
+[Live Demo](https://resumeaibyamit.vercel.app/) · [Report Bug](https://github.com/Amitk-umar/Ai-powered-resumebuilder/issues) · [Request Feature](https://github.com/Amitk-umar/Ai-powered-resumebuilder/issues)
 
 </div>
 
