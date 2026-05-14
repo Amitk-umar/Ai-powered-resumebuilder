@@ -12,12 +12,19 @@ exports.getDashboard = asyncHandler(async (_req, res) => {
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
-  const [users, contacts, requests, resumesThisMonth, screeningsCount] = await Promise.all([
+  const [users, contacts, requests, resumesThisMonth, screeningsCount, topSkillsAgg] = await Promise.all([
     User.find().sort({ createdAt: -1 }).select('-__v'),
     Contact.find().sort({ createdAt: -1 }).limit(50),
     PlanRequest.find().sort({ createdAt: -1 }).limit(50),
     Resume.countDocuments({ createdAt: { $gte: monthStart } }),
     Screening.countDocuments(),
+    Screening.aggregate([
+      { $project: { allKeywords: { $concatArrays: [{ $ifNull: ["$matchedKeywords", []] }, { $ifNull: ["$missingKeywords", []] }] } } },
+      { $unwind: "$allKeywords" },
+      { $group: { _id: "$allKeywords", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ])
   ]);
 
   const planCounts = users.reduce((acc, user) => {
@@ -41,6 +48,7 @@ exports.getDashboard = asyncHandler(async (_req, res) => {
       pendingRequests: requests.filter((r) => r.status === 'pending').length,
     },
     planCounts,
+    topSkills: topSkillsAgg.map(s => ({ skill: s._id, count: s.count })),
     users,
     contacts,
     requests,

@@ -1,5 +1,5 @@
 const multer = require('multer');
-const AIScreener = require('../services/aiScreener');
+const aiService = require('../services/aiService');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 
@@ -29,12 +29,14 @@ exports.screenResume = asyncHandler(async (req, res) => {
   const { jobDescription } = req.body;
   if (!jobDescription?.trim()) throw new ApiError(400, 'Job description is required');
 
-  // Extract text from the uploaded file
-  let resumeText = '';
-  if (req.file.mimetype === 'application/pdf') {
-    resumeText = await AIScreener.extractText(req.file.buffer);
-  } else {
-    resumeText = req.file.buffer.toString('utf-8');
+  let resumeText = req.body.resumeText;
+  
+  if (!resumeText) {
+    if (req.file.mimetype === 'application/pdf') {
+      resumeText = await aiService.constructor.extractText(req.file.buffer);
+    } else {
+      resumeText = req.file.buffer.toString('utf-8');
+    }
   }
 
   if (!resumeText.trim()) {
@@ -43,6 +45,6 @@ exports.screenResume = asyncHandler(async (req, res) => {
     );
   }
 
-  const results = AIScreener.analyze(resumeText, jobDescription);
+  const results = await aiService.analyzeResumeVsJD(resumeText, jobDescription);
   res.json(results);
 });

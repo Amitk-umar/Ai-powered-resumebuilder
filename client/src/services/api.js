@@ -3,11 +3,9 @@ import { auth } from '../config/firebase';
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 /**
- * Centralized API client for the ResumeAI backend.
- *
+ * Centralized API client for the NextHireAI backend.
  * Automatically injects the Firebase auth token and handles
  * JSON parsing and error responses.
- *
  * Usage:
  *   const resumes = await api.get('/resumes');
  *   const created = await api.post('/resumes', payload);

@@ -1,0 +1,99 @@
+NVIDIA_API_KEY = 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
+
+
+API REQUEST CODEs
+
+
+option 1 :GLM5.1
+
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: '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',
+  baseURL: 'https://integrate.api.nvidia.com/v1',
+})
+ 
+async function main() {
+  const completion = await openai.chat.completions.create({
+    model: "z-ai/glm-5.1",
+    messages: [{"role":"user","content":""}],
+    temperature: 1,
+    top_p: 1,
+    max_tokens: 16384,
+    chat_template_kwargs: {"enable_thinking":true,"clear_thinking":false},
+    stream: true
+  })
+   
+  for await (const chunk of completion) {
+        const reasoning = chunk.choices[0]?.delta?.reasoning_content;
+    if (reasoning) process.stdout.write(reasoning);
+        process.stdout.write(chunk.choices[0]?.delta?.content || '')
+    
+  }
+  
+}
+
+main();
+
+
+
+option 2 : nomotron api key 
+
+from openai import OpenAI
+
+client = OpenAI(
+  base_url = "https://integrate.api.nvidia.com/v1",
+  api_key = "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"
+)
+
+
+completion = client.chat.completions.create(
+  model="nvidia/nemotron-3-super-120b-a12b",
+  messages=[{"role":"user","content":""}],
+  temperature=1,
+  top_p=0.95,
+  max_tokens=16384,
+  extra_body={"chat_template_kwargs":{"enable_thinking":True},"reasoning_budget":16384},
+  stream=True
+)
+
+for chunk in completion:
+  if not chunk.choices:
+    continue
+  reasoning = getattr(chunk.choices[0].delta, "reasoning_content", None)
+  if reasoning:
+    print(reasoning, end="")
+  if chunk.choices[0].delta.content is not None:
+    print(chunk.choices[0].delta.content, end="")
+  
+option 3:nemotron-3-super-120b-a12b
+from openai import OpenAI
+
+client = OpenAI(
+  base_url = "https://integrate.api.nvidia.com/v1",
+  api_key = "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"
+)
+
+
+completion = client.chat.completions.create(
+  model="nvidia/nemotron-3-super-120b-a12b",
+  messages=[{"role":"user","content":""}],
+  temperature=1,
+  top_p=0.95,
+  max_tokens=16384,
+  extra_body={"chat_template_kwargs":{"enable_thinking":True},"reasoning_budget":16384},
+  stream=True
+)
+
+for chunk in completion:
+  if not chunk.choices:
+    continue
+  reasoning = getattr(chunk.choices[0].delta, "reasoning_content", None)
+  if reasoning:
+    print(reasoning, end="")
+  if chunk.choices[0].delta.content is not None:
+    print(chunk.choices[0].delta.content, end="")
+  
+
+
+

@@ -5,7 +5,7 @@ import FloatingOrbs from '../components/FloatingOrbs';
 import {
   HiUpload, HiDocumentText, HiSearch, HiChartBar,
   HiLightningBolt, HiCheckCircle, HiExclamationCircle,
-  HiXCircle, HiInformationCircle
+  HiInformationCircle, HiBriefcase, HiAcademicCap, HiFolder
 } from 'react-icons/hi';
 import './ResumeScreener.css';
 
@@ -29,205 +29,6 @@ async function extractPdfText(file) {
   }
 
   return fullText;
-}
-
-/**
- * Extract keywords from job description text
- */
-function extractJDKeywords(jdText) {
-  const jdLower = jdText.toLowerCase();
-
-  // Multi-word phrases MUST be checked first (longer phrases before shorter ones)
-  const multiWordKeywords = [
-    'machine learning', 'deep learning', 'artificial intelligence',
-    'natural language processing', 'computer vision',
-    'version control', 'source control',
-    'rest api', 'restful api', 'web api', 'api gateway', 'api development',
-    'front end', 'frontend development', 'back end', 'backend development',
-    'full stack', 'full-stack',
-    'data structures', 'data science', 'data analysis', 'data engineering',
-    'big data', 'data visualization', 'data modeling',
-    'cloud computing', 'cloud services', 'cloud infrastructure',
-    'ci/cd', 'ci cd', 'continuous integration', 'continuous deployment',
-    'unit testing', 'integration testing', 'test driven', 'test automation',
-    'project management', 'product management',
-    'system design', 'software architecture', 'design patterns',
-    'object oriented', 'functional programming',
-    'responsive design', 'web design', 'ui design', 'ux design', 'ui/ux',
-    'user experience', 'user interface',
-    'mobile development', 'cross platform',
-    'react native', 'react.js', 'reactjs',
-    'node.js', 'nodejs', 'next.js', 'nextjs', 'vue.js', 'vuejs',
-    'asp.net', '.net core', '.net framework',
-    'spring boot', 'ruby on rails',
-    'google cloud', 'google cloud platform',
-    'power bi', 'scikit-learn', 'scikit learn',
-    'problem solving', 'critical thinking', 'time management',
-    'team collaboration', 'cross functional',
-    'software development', 'web development', 'app development',
-    'agile methodology', 'scrum master',
-    'database management', 'database design',
-    'network security', 'information security', 'cyber security',
-    'operating systems', 'distributed systems',
-    'content management', 'search engine optimization',
-  ];
-
-  // Single-word tech keywords (only real tech terms, no generic English words)
-  const singleKeywords = [
-    // Languages
-    'javascript', 'typescript', 'python', 'java', 'c++', 'c#', 'ruby',
-    'golang', 'rust', 'swift', 'kotlin', 'php', 'scala', 'perl',
-    'r', 'matlab', 'dart', 'lua', 'haskell', 'elixir',
-    // Frontend
-    'react', 'angular', 'vue', 'svelte', 'jquery', 'webpack', 'vite',
-    'html', 'html5', 'css', 'css3', 'sass', 'scss', 'less',
-    'tailwind', 'bootstrap', 'chakra',
-    // Backend
-    'express', 'django', 'flask', 'fastapi', 'spring', 'laravel',
-    'rails', 'sinatra', 'graphql', 'grpc',
-    // Databases
-    'mongodb', 'postgresql', 'postgres', 'mysql', 'redis', 'firebase',
-    'dynamodb', 'sql', 'nosql', 'elasticsearch', 'sqlite', 'oracle',
-    'cassandra', 'couchdb', 'mariadb', 'supabase',
-    // Cloud & DevOps
-    'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'k8s',
-    'jenkins', 'terraform', 'ansible', 'puppet', 'chef',
-    'linux', 'unix', 'nginx', 'apache', 'heroku', 'vercel', 'netlify',
-    'cloudflare', 'digitalocean',
-    // Tools
-    'git', 'github', 'gitlab', 'bitbucket', 'jira', 'confluence',
-    'figma', 'sketch', 'postman', 'swagger', 'grafana', 'prometheus',
-    'kibana', 'splunk', 'datadog', 'sentry',
-    // AI/ML
-    'tensorflow', 'pytorch', 'keras', 'pandas', 'numpy', 'opencv',
-    'tableau', 'hadoop', 'spark', 'kafka', 'airflow', 'dbt',
-    // Mobile
-    'android', 'ios', 'flutter', 'xamarin', 'ionic', 'cordova',
-    // Concepts (only specific tech concepts)
-    'microservices', 'serverless', 'devops', 'blockchain', 'web3',
-    'solidity', 'oauth', 'jwt', 'websocket', 'graphql',
-    'redis', 'rabbitmq', 'celery', 'socket.io',
-    // Methodologies
-    'agile', 'scrum', 'kanban',
-  ];
-
-  const matched = new Set();
-
-  // Step 1: Check multi-word phrases first
-  multiWordKeywords.forEach(phrase => {
-    if (jdLower.includes(phrase)) {
-      matched.add(phrase);
-    }
-  });
-
-  // Step 2: Check single keywords, but skip if already covered by a multi-word phrase
-  singleKeywords.forEach(keyword => {
-    if (jdLower.includes(keyword)) {
-      // Don't add "react" if "react native" already matched, etc.
-      const alreadyCovered = [...matched].some(m => m.includes(keyword) && m !== keyword);
-      if (!alreadyCovered) {
-        matched.add(keyword);
-      }
-    }
-  });
-
-  return [...matched];
-}
-
-/**
- * Perform REAL analysis comparing resume text against job description
- */
-function analyzeResumeVsJD(resumeText, jobDescription) {
-  const resumeLower = resumeText.toLowerCase();
-  const jdKeywords = extractJDKeywords(jobDescription);
-
-  const matched = [];
-  const missing = [];
-
-  jdKeywords.forEach(keyword => {
-    if (resumeLower.includes(keyword)) {
-      matched.push(keyword);
-    } else {
-      missing.push(keyword);
-    }
-  });
-
-  // Calculate keyword match score
-  const keywordScore = jdKeywords.length > 0
-    ? (matched.length / jdKeywords.length) * 100
-    : 0;
-
-  // Formatting analysis
-  let formatScore = 100;
-  const formatIssues = [];
-
-  const sections = ['experience', 'education', 'skills'];
-  sections.forEach(s => {
-    if (!resumeLower.includes(s)) {
-      formatScore -= 10;
-      formatIssues.push(`Missing standard section: "${s}" — ATS systems look for this heading`);
-    }
-  });
-
-  const wordCount = resumeText.split(/\s+/).length;
-  if (wordCount < 100) {
-    formatScore -= 15;
-    formatIssues.push('Resume text is very short. Ensure your PDF is text-based, not a scanned image.');
-  }
-
-  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
-  if (!emailRegex.test(resumeText)) {
-    formatScore -= 10;
-    formatIssues.push('No email address detected in resume.');
-  }
-
-  const actionVerbs = ['led', 'developed', 'implemented', 'designed', 'managed', 'built',
-    'created', 'improved', 'achieved', 'delivered', 'increased', 'reduced'];
-  if (!actionVerbs.some(v => resumeLower.includes(v))) {
-    formatScore -= 10;
-    formatIssues.push('Use action verbs (Led, Developed, Implemented) to describe achievements.');
-  }
-
-  if (formatIssues.length === 0) {
-    formatIssues.push('Good formatting! Your resume follows ATS best practices.');
-  }
-
-  // Overall score (70% keyword match, 30% formatting)
-  const overallScore = Math.round(keywordScore * 0.7 + Math.max(formatScore, 0) * 0.3);
-
-  // Generate suggestions
-  const suggestions = [];
-  if (missing.length > 0) {
-    suggestions.push(`Add these missing keywords to your resume: ${missing.slice(0, 5).join(', ')}`);
-  }
-  if (missing.length > matched.length) {
-    suggestions.push('Your resume has low keyword overlap with this job. Tailor it more closely.');
-  }
-  if (wordCount < 300) {
-    suggestions.push('Your resume seems short. Add more details about your experience and projects.');
-  }
-  if (!resumeLower.includes('summary') && !resumeLower.includes('objective') && !resumeLower.includes('profile')) {
-    suggestions.push('Add a Professional Summary section tailored to this specific role.');
-  }
-  suggestions.push('Use bullet points with quantifiable achievements (numbers, percentages, metrics).');
-  suggestions.push('Ensure your resume is saved as a text-based PDF (not scanned image) for ATS parsing.');
-
-  return {
-    score: Math.min(Math.max(overallScore, 0), 100),
-    matchedKeywords: matched,
-    missingKeywords: missing,
-    suggestions: suggestions.slice(0, 6),
-    formatting: {
-      score: Math.max(formatScore, 0),
-      issues: formatIssues
-    },
-    details: {
-      totalKeywords: jdKeywords.length,
-      matchedCount: matched.length,
-      missingCount: missing.length,
-      resumeWordCount: wordCount
-    }
-  };
 }
 
 export default function ResumeScreener() {
@@ -282,7 +83,6 @@ export default function ResumeScreener() {
     setResults(null);
 
     try {
-      // Step 1: Extract text from PDF on client side
       let resumeText = '';
       if (file.type === 'application/pdf') {
         resumeText = await extractPdfText(file);
@@ -296,38 +96,29 @@ export default function ResumeScreener() {
         return;
       }
 
-      // Step 2: Try backend first
-      try {
-        const formData = new FormData();
-        formData.append('resume', file);
-        formData.append('jobDescription', jobDescription);
+      const formData = new FormData();
+      formData.append('resume', file);
+      formData.append('jobDescription', jobDescription);
+      formData.append('resumeText', resumeText);
 
-        const response = await api.post('/screen', formData);
+      const response = await api.post('/screen', formData);
 
-        if (response.ok) {
-          const data = await response.json();
-          setResults(data);
-          await saveScreening(file.name, data);
-          setAnalyzing(false);
-          return;
-        }
-      } catch (backendErr) {
-        console.log('Backend unavailable, using client-side analysis');
+      if (response.ok) {
+        const data = await response.json();
+        setResults(data);
+        await saveScreening(file.name, data);
+      } else {
+        const errData = await response.json();
+        alert('Analysis failed: ' + (errData.error || 'Unknown error'));
       }
-
-      // Step 3: Client-side analysis with REAL resume text
-      const analysisResults = analyzeResumeVsJD(resumeText, jobDescription);
-      setResults(analysisResults);
-      await saveScreening(file.name, analysisResults);
     } catch (err) {
       console.error('Analysis error:', err);
-      alert('Error analyzing resume: ' + err.message);
+      alert('Error analyzing resume: Please check your network or try again.');
     }
 
     setAnalyzing(false);
   };
 
-  // Save screening result to MongoDB via API
   const saveScreening = async (fileName, data) => {
     try {
       await api.post('/screenings', {
@@ -337,7 +128,9 @@ export default function ResumeScreener() {
         missingKeywords: data.missingKeywords || [],
         matchedCount: data.matchedKeywords?.length || 0,
         missingCount: data.missingKeywords?.length || 0,
-        suggestions: data.suggestions || [],
+        analysis: data.analysis || {},
+        careerGuidance: data.careerGuidance || {},
+        jobRecommendations: data.jobRecommendations || [],
         formatting: data.formatting || { score: 0, issues: [] },
       });
     } catch (err) {
@@ -366,8 +159,8 @@ export default function ResumeScreener() {
       <FloatingOrbs />
       <div className="container">
         <div className="page-header fade-in-up">
-          <h1>AI Resume <span className="gradient-text">Screener</span></h1>
-          <p>Upload a resume and job description to get an instant ATS compatibility analysis</p>
+          <h1>AI Resume <span className="gradient-text">Screener & Coach</span></h1>
+          <p>Upload a resume and job description to get deep AI analysis and career recommendations</p>
         </div>
 
         <div className="screener-content">
@@ -427,11 +220,11 @@ export default function ResumeScreener() {
               {analyzing ? (
                 <>
                   <span className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }}></span>
-                  Analyzing...
+                  Analyzing via AI...
                 </>
               ) : (
                 <>
-                  <HiLightningBolt /> Analyze Resume
+                  <HiLightningBolt /> Analyze with AI
                 </>
               )}
             </button>
@@ -442,7 +235,7 @@ export default function ResumeScreener() {
             <div className="screener-results fade-in-up">
               {/* Score */}
               <div className="score-section glass-card">
-                <h3><HiChartBar /> ATS Compatibility Score</h3>
+                <h3><HiChartBar /> Overall ATS Match Score</h3>
                 <div className="score-display">
                   <div className="score-ring">
                     <svg viewBox="0 0 120 120" width="120" height="120">
@@ -463,49 +256,123 @@ export default function ResumeScreener() {
               </div>
 
               {/* Keywords */}
-              <div className="keywords-section glass-card">
-                <h3><HiCheckCircle style={{ color: 'var(--success)' }} /> Matched Keywords</h3>
-                <div className="keyword-tags">
-                  {results.matchedKeywords.map((kw, i) => (
-                    <span key={i} className="keyword-tag matched">{kw}</span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="keywords-section glass-card">
-                <h3><HiExclamationCircle style={{ color: 'var(--warning)' }} /> Missing Keywords</h3>
-                <div className="keyword-tags">
-                  {results.missingKeywords.map((kw, i) => (
-                    <span key={i} className="keyword-tag missing">{kw}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Suggestions */}
-              <div className="suggestions-section glass-card">
-                <h3><HiInformationCircle style={{ color: 'var(--accent-primary)' }} /> Improvement Suggestions</h3>
-                <ul className="suggestions-list">
-                  {results.suggestions.map((s, i) => (
-                    <li key={i}>
-                      <HiLightningBolt className="suggestion-icon" />
-                      <span>{s}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Formatting */}
-              {results.formatting && (
-                <div className="formatting-section glass-card">
-                  <h3>Formatting Score: <span className={`badge badge-${getScoreColor(results.formatting.score)}`}>{results.formatting.score}/100</span></h3>
-                  <ul className="suggestions-list">
-                    {results.formatting.issues.map((issue, i) => (
-                      <li key={i}>
-                        <HiInformationCircle className="suggestion-icon" />
-                        <span>{issue}</span>
-                      </li>
+              <div className="keywords-wrapper">
+                <div className="keywords-section glass-card">
+                  <h3><HiCheckCircle style={{ color: 'var(--success)' }} /> Matched Keywords</h3>
+                  <div className="keyword-tags">
+                    {results.matchedKeywords?.map((kw, i) => (
+                      <span key={i} className="keyword-tag matched">{kw}</span>
                     ))}
-                  </ul>
+                  </div>
+                </div>
+
+                <div className="keywords-section glass-card">
+                  <h3><HiExclamationCircle style={{ color: 'var(--warning)' }} /> Missing Keywords</h3>
+                  <div className="keyword-tags">
+                    {results.missingKeywords?.map((kw, i) => (
+                      <span key={i} className="keyword-tag missing">{kw}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Deep Analysis */}
+              {results.analysis && (
+                <div className="analysis-section glass-card">
+                  <h3><HiDocumentText style={{ color: 'var(--accent-primary)' }} /> Deep Resume Analysis</h3>
+                  <div className="analysis-grid">
+                    {results.analysis.skills && (
+                      <div className="analysis-item">
+                        <h4><HiLightningBolt /> Skills</h4>
+                        <p>{results.analysis.skills}</p>
+                      </div>
+                    )}
+                    {results.analysis.experience && (
+                      <div className="analysis-item">
+                        <h4><HiBriefcase /> Experience</h4>
+                        <p>{results.analysis.experience}</p>
+                      </div>
+                    )}
+                    {results.analysis.education && (
+                      <div className="analysis-item">
+                        <h4><HiAcademicCap /> Education</h4>
+                        <p>{results.analysis.education}</p>
+                      </div>
+                    )}
+                    {results.analysis.projects && (
+                      <div className="analysis-item">
+                        <h4><HiFolder /> Projects</h4>
+                        <p>{results.analysis.projects}</p>
+                      </div>
+                    )}
+                    {results.analysis.overallQuality && (
+                      <div className="analysis-item full-width">
+                        <h4>Overall Quality</h4>
+                        <p>{results.analysis.overallQuality}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Career Guidance */}
+              {results.careerGuidance && (
+                <div className="guidance-section glass-card">
+                  <h3><HiInformationCircle style={{ color: 'var(--accent-secondary)' }} /> AI Career Guidance</h3>
+                  <div className="guidance-content">
+                    {results.careerGuidance.coachingSuggestions?.length > 0 && (
+                      <div className="guidance-block">
+                        <h4>Coaching Suggestions</h4>
+                        <ul>
+                          {results.careerGuidance.coachingSuggestions.map((s, i) => <li key={i}>{s}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {results.careerGuidance.improvementAreas?.length > 0 && (
+                      <div className="guidance-block">
+                        <h4>Areas to Improve</h4>
+                        <ul>
+                          {results.careerGuidance.improvementAreas.map((s, i) => <li key={i}>{s}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {results.careerGuidance.enhancementStrategies?.length > 0 && (
+                      <div className="guidance-block">
+                        <h4>Enhancement Strategies</h4>
+                        <ul>
+                          {results.careerGuidance.enhancementStrategies.map((s, i) => <li key={i}>{s}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Job Recommendations & Direct Apply */}
+              {results.jobRecommendations?.length > 0 && (
+                <div className="jobs-section glass-card">
+                  <h3><HiBriefcase style={{ color: 'var(--success)' }} /> Job Recommendations & Opportunities</h3>
+                  <div className="jobs-grid">
+                    {results.jobRecommendations.map((job, i) => (
+                      <div key={i} className="job-card">
+                        <h4>{job.role}</h4>
+                        <h5>{job.company}</h5>
+                        <p className="job-opportunity">{job.opportunity}</p>
+                        <div className="job-details">
+                          <strong>Required Skills:</strong>
+                          <div className="job-skills">
+                            {job.skills?.map((s, j) => <span key={j}>{s}</span>)}
+                          </div>
+                        </div>
+                        <button 
+                          className="btn btn-primary btn-sm direct-apply-btn"
+                          onClick={() => window.open(job.applicationUrl || `https://www.google.com/search?q=${encodeURIComponent(job.role + ' ' + job.company + ' jobs')}`, '_blank')}
+                        >
+                          Direct Apply
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

@@ -34,19 +34,7 @@ export default function ResumeBuilder() {
   const [planTemplates, setPlanTemplates] = useState(TEMPLATES);
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(() => new URLSearchParams(window.location.search).get('preview') === '1');
-  const [data, setData] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
-    if (id) {
-      const saved = JSON.parse(localStorage.getItem('resumeai-resumes') || '[]');
-      const found = saved.find(r => r.id === id);
-      if (found) {
-        setTemplate(found.template || 'Modern');
-        return found.data || { ...emptyResume };
-      }
-    }
-    return { ...emptyResume };
-  });
+  const [data, setData] = useState({ ...emptyResume });
   const previewRef = useRef(null);
 
   useEffect(() => {
@@ -149,33 +137,12 @@ export default function ResumeBuilder() {
       }
       window.history.replaceState({}, '', `/builder?id=${saved._id}`);
       alert('Resume saved successfully!');
-      setSaving(false);
-      return;
     } catch (error) {
-      console.log('Server save failed, saving locally:', error.message);
+      console.log('Server save failed:', error.message);
+      alert('Could not save resume. Please ensure you are logged in and try again.');
+    } finally {
+      setSaving(false);
     }
-
-    const resumes = JSON.parse(localStorage.getItem('resumeai-resumes') || '[]');
-    const resumeObj = {
-      id: existingId || Date.now().toString(),
-      ...payload,
-      data,
-      updatedAt: new Date().toISOString()
-    };
-
-    if (existingId) {
-      const idx = resumes.findIndex(r => r.id === existingId);
-      if (idx >= 0) resumes[idx] = resumeObj;
-      else resumes.push(resumeObj);
-    } else {
-      resumes.push(resumeObj);
-      // Update URL so we can continue editing
-      window.history.replaceState({}, '', `/builder?id=${resumeObj.id}`);
-    }
-
-    localStorage.setItem('resumeai-resumes', JSON.stringify(resumes));
-    alert('Resume saved successfully!');
-    setSaving(false);
   };
 
   const exportPDF = async () => {

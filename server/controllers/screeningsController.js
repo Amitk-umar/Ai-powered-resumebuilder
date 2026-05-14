@@ -17,7 +17,7 @@ exports.saveScreening = asyncHandler(async (req, res) => {
     fileName, score,
     matchedKeywords, missingKeywords,
     matchedCount, missingCount,
-    suggestions, formatting,
+    analysis, careerGuidance, jobRecommendations, formatting
   } = req.body;
 
   const screening = await Screening.create({
@@ -28,7 +28,9 @@ exports.saveScreening = asyncHandler(async (req, res) => {
     missingKeywords: missingKeywords || [],
     matchedCount: matchedCount || 0,
     missingCount: missingCount || 0,
-    suggestions: suggestions || [],
+    analysis: analysis || {},
+    careerGuidance: careerGuidance || {},
+    jobRecommendations: jobRecommendations || [],
     formatting: formatting || { score: 0, issues: [] },
   });
 

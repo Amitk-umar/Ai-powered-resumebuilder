@@ -1,0 +1,96 @@
+PROJECT REQUIREMENT DOCUMENT (PRD)
+
+1. AI-BASED RESUME ANALYSIS & CAREER RECOMMENDATION SYSTEM
+
+Objective:
+Replace the traditional keyword-matching system with an advanced AI-powered resume analysis and career recommendation system.
+
+AI Integrations:
+- Google Gemini (via AI Studio)
+- Together AI
+- OpenRouter
+- Cloudflare AI
+- NVIDIA Build AI APIs
+
+Functional Requirements:
+
+The system should allow users to upload their resumes and perform the following operations:
+
+Resume Analysis:
+- Analyze user skills
+- Analyze education details
+- Analyze work experience
+- Analyze certifications
+- Analyze projects
+- Evaluate overall resume quality
+
+AI Career Guidance:
+- Provide AI-generated career coaching suggestions
+- Identify areas that need improvement
+- Suggest missing skills for targeted job roles
+- Recommend resume enhancement strategies
+- Provide industry-specific guidance for better selection opportunities
+
+Job & Company Recommendations:
+- Recommend suitable companies
+- Recommend relevant job roles
+- Recommend career opportunities based on profile analysis
+
+Job Information Display:
+Display complete job-related information including:
+- Job Description (JD)
+- Required qualifications
+- Required skills
+- Eligibility criteria
+
+Direct Apply Feature:
+- Include a “Direct Apply” button for recommended jobs/opportunities
+- Allow users to directly apply for jobs through the platform
+
+Smart Matching System:
+Match opportunities based on:
+- User qualifications
+- Skills
+- Experience
+- Resume strength
+- Eligibility requirements
+
+
+2. DATABASE & STORAGE MANAGEMENT
+
+Requirements:
+- Do not store user data in browser local storage
+- Use MongoDB as the primary database
+
+MongoDB should store:
+- User information
+- Uploaded resumes
+- Application data
+- Analytics data
+- AI-generated suggestions and reports
+
+Additional Requirements:
+- Ensure secure data management
+- Ensure scalable backend architecture
+- Maintain proper database structure and optimization
+
+
+3. ADMIN ANALYTICS DASHBOARD
+
+Objective:
+Develop a dedicated Admin Dashboard for monitoring platform activities and analytics.
+
+Dashboard Features:
+- User activity analytics
+- Resume upload statistics
+- Application tracking data
+- AI usage analytics
+- Charts and graphical reports
+- User engagement insights
+- Most searched skills and job roles
+- Platform performance metrics
+
+Dashboard Requirements:
+- Clean and modern UI
+- Easy-to-understand analytics interface
+- Responsive and user-friendly admin experience

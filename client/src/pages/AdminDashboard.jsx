@@ -4,7 +4,7 @@ import api from '../services/api';
 import FloatingOrbs from '../components/FloatingOrbs';
 import {
   HiChartBar, HiUsers, HiMail, HiDocumentText,
-  HiCheckCircle, HiXCircle, HiClock
+  HiCheckCircle, HiXCircle, HiClock, HiLightningBolt
 } from 'react-icons/hi';
 import './AdminDashboard.css';
 
@@ -41,6 +41,7 @@ export default function AdminDashboard() {
     ['Users', data?.stats?.users || 0, <HiUsers />, '#6366f1'],
     ['Active Users', data?.stats?.activeUsers || 0, <HiChartBar />, '#22c55e'],
     ['Resumes This Month', data?.stats?.resumesThisMonth || 0, <HiDocumentText />, '#0ea5e9'],
+    ['AI Screenings', data?.stats?.screeningsCount || 0, <HiLightningBolt />, '#ec4899'],
     ['Contact Forms', data?.stats?.contacts || 0, <HiMail />, '#f59e0b'],
     ['Pending Upgrades', data?.stats?.pendingRequests || 0, <HiClock />, '#8b5cf6']
   ];
@@ -167,6 +168,27 @@ export default function AdminDashboard() {
                       </div>
                     );
                   })}
+                </div>
+              </section>
+
+              <section className="glass-card admin-panel">
+                <div className="admin-panel-header">
+                  <h2>Top Searched Skills</h2>
+                </div>
+                <div className="plan-bars">
+                  {data?.topSkills?.map((skillObj, idx) => {
+                    const max = Math.max(data?.topSkills[0]?.count || 1, 1);
+                    return (
+                      <div className="plan-bar-row" key={idx}>
+                        <span style={{flex: 2}}>{skillObj.skill}</span>
+                        <div className="plan-bar-track" style={{flex: 3}}>
+                          <div className="plan-bar-fill" style={{ width: `${(skillObj.count / max) * 100}%`, background: 'var(--accent-primary)' }}></div>
+                        </div>
+                        <strong>{skillObj.count}</strong>
+                      </div>
+                    );
+                  })}
+                  {(!data?.topSkills || data.topSkills.length === 0) && <p className="admin-empty">No skills data yet.</p>}
                 </div>
               </section>
             </div>
