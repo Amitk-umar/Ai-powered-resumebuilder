@@ -12,7 +12,17 @@ exports.getDashboard = asyncHandler(async (_req, res) => {
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
-  const [users, contacts, requests, resumesThisMonth, screeningsCount, topSkillsAgg] = await Promise.all([
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+  const timeSeriesPipeline = [
+    { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+    { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
+    { $sort: { _id: 1 } }
+  ];
+
+  const [users, contacts, requests, resumesThisMonth, screeningsCount, topSkillsAgg, usersTs, resumesTs, screeningsTs] = await Promise.all([
     User.find().sort({ createdAt: -1 }).select('-__v'),
     Contact.find().sort({ createdAt: -1 }).limit(50),
     PlanRequest.find().sort({ createdAt: -1 }).limit(50),
@@ -24,7 +34,10 @@ exports.getDashboard = asyncHandler(async (_req, res) => {
       { $group: { _id: "$allKeywords", count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 10 }
-    ])
+    ]),
+    User.aggregate(timeSeriesPipeline),
+    Resume.aggregate(timeSeriesPipeline),
+    Screening.aggregate(timeSeriesPipeline)
   ]);
 
   const planCounts = users.reduce((acc, user) => {
@@ -38,6 +51,20 @@ exports.getDashboard = asyncHandler(async (_req, res) => {
     return date && new Date(date) >= monthStart;
   }).length;
 
+  const timeSeriesData = [];
+  for (let i = 0; i <= 30; i++) {
+    const d = new Date(thirtyDaysAgo);
+    d.setDate(d.getDate() + i);
+    const dateStr = d.toISOString().split('T')[0];
+    
+    timeSeriesData.push({
+      date: dateStr,
+      users: usersTs.find(x => x._id === dateStr)?.count || 0,
+      resumes: resumesTs.find(x => x._id === dateStr)?.count || 0,
+      screenings: screeningsTs.find(x => x._id === dateStr)?.count || 0,
+    });
+  }
+
   res.json({
     stats: {
       users: users.length,
@@ -49,6 +76,7 @@ exports.getDashboard = asyncHandler(async (_req, res) => {
     },
     planCounts,
     topSkills: topSkillsAgg.map(s => ({ skill: s._id, count: s.count })),
+    timeSeriesData,
     users,
     contacts,
     requests,

@@ -5,7 +5,9 @@ import FloatingOrbs from '../components/FloatingOrbs';
 import {
   HiUpload, HiDocumentText, HiSearch, HiChartBar,
   HiLightningBolt, HiCheckCircle, HiExclamationCircle,
-  HiInformationCircle, HiBriefcase, HiAcademicCap, HiFolder
+  HiInformationCircle, HiBriefcase, HiAcademicCap, HiFolder,
+  HiExternalLink, HiShieldCheck, HiStar, HiTrendingUp,
+  HiClipboardCheck, HiCog, HiGlobe
 } from 'react-icons/hi';
 import './ResumeScreener.css';
 
@@ -152,23 +154,42 @@ export default function ResumeScreener() {
     return 'Poor';
   };
 
-  const circumference = 2 * Math.PI * 52;
+  const getScoreEmoji = (score) => {
+    if (score >= 80) return '🎯';
+    if (score >= 60) return '👍';
+    if (score >= 40) return '⚡';
+    return '⚠️';
+  };
+
+  const circumference = 2 * Math.PI * 56;
 
   return (
     <div className="page screener-page">
       <FloatingOrbs />
       <div className="container">
-        <div className="page-header fade-in-up">
-          <h1>AI Resume <span className="gradient-text">Screener & Coach</span></h1>
-          <p>Upload a resume and job description to get deep AI analysis and career recommendations</p>
+
+        {/* ── Hero ──────────────────────────── */}
+        <div className="screener-hero">
+          <div className="screener-hero-badge">
+            <HiLightningBolt /> AI-Powered Analysis
+          </div>
+          <h1>Resume <span className="gradient-text">Screener & Coach</span></h1>
+          <p className="screener-hero-desc">
+            Upload your resume against any job description to get deep ATS analysis,
+            keyword matching, career coaching, and personalized job recommendations.
+          </p>
         </div>
 
-        <div className="screener-content">
-          {/* Input Section */}
-          <div className="screener-input fade-in-up delay-1">
-            {/* Upload */}
-            <div className="upload-section glass-card">
-              <h3><HiDocumentText /> Upload Resume</h3>
+        {/* ── Input Grid ───────────────────── */}
+        <div className="screener-input-grid">
+
+          {/* Upload Card */}
+          <div className="screener-card">
+            <div className="screener-card-header">
+              <div className="screener-card-icon upload"><HiDocumentText /></div>
+              <span className="screener-card-title">Upload Resume</span>
+            </div>
+            <div className="screener-card-body">
               <div
                 className={`upload-zone ${dragActive ? 'drag-active' : ''} ${file ? 'has-file' : ''}`}
                 onDragEnter={handleDrag}
@@ -192,192 +213,392 @@ export default function ResumeScreener() {
                   </div>
                 ) : (
                   <div className="upload-placeholder">
-                    <HiUpload className="upload-icon" />
-                    <p>Drag & drop your resume here</p>
-                    <span>or click to browse (PDF, DOCX • Max 5MB)</span>
+                    <div className="upload-icon-wrap">
+                      <HiUpload />
+                    </div>
+                    <p>Drag & drop your resume</p>
+                    <span>or click to browse · PDF, DOCX · Max 5MB</span>
                   </div>
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Job Description */}
-            <div className="jd-section glass-card">
-              <h3><HiSearch /> Job Description</h3>
+          {/* Job Description Card */}
+          <div className="screener-card">
+            <div className="screener-card-header">
+              <div className="screener-card-icon jd"><HiSearch /></div>
+              <span className="screener-card-title">Job Description</span>
+            </div>
+            <div className="screener-card-body">
               <textarea
-                className="form-input form-textarea jd-textarea"
+                className="jd-textarea"
                 rows="8"
-                placeholder="Paste the job description here...&#10;&#10;Example: We are looking for a Full Stack Developer with experience in React, Node.js, MongoDB..."
+                placeholder={"Paste the job description here...\n\nExample: We are looking for a Full Stack Developer with experience in React, Node.js, MongoDB..."}
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
               />
             </div>
-
-            <button
-              className="btn btn-primary btn-lg analyze-btn"
-              onClick={analyzeResume}
-              disabled={!file || !jobDescription.trim() || analyzing}
-            >
-              {analyzing ? (
-                <>
-                  <span className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }}></span>
-                  Analyzing via AI...
-                </>
-              ) : (
-                <>
-                  <HiLightningBolt /> Analyze with AI
-                </>
-              )}
-            </button>
           </div>
+        </div>
 
-          {/* Results */}
-          {results && (
-            <div className="screener-results fade-in-up">
-              {/* Score */}
-              <div className="score-section glass-card">
-                <h3><HiChartBar /> Overall ATS Match Score</h3>
-                <div className="score-display">
-                  <div className="score-ring">
-                    <svg viewBox="0 0 120 120" width="120" height="120">
-                      <circle className="ring-bg" cx="60" cy="60" r="52" />
-                      <circle
-                        className={`ring-fill ${getScoreColor(results.score)}`}
-                        cx="60" cy="60" r="52"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={circumference - (results.score / 100) * circumference}
-                      />
-                    </svg>
-                    <div className="score-value">
-                      <span className="number">{results.score}</span>
-                      <span className="label">{getScoreLabel(results.score)}</span>
+        {/* ── Analyze Button ───────────────── */}
+        <button
+          className="analyze-btn"
+          onClick={analyzeResume}
+          disabled={!file || !jobDescription.trim() || analyzing}
+          id="analyze-resume-btn"
+        >
+          {analyzing ? (
+            <>
+              <span className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }}></span>
+              Analyzing via AI…
+            </>
+          ) : (
+            <>
+              <HiLightningBolt /> Analyze with AI
+            </>
+          )}
+        </button>
+
+        {/* ── Results ──────────────────────── */}
+        {results && (
+          <div className="screener-results">
+
+            <div className="results-divider">
+              <span className="results-divider-text">Analysis Results</span>
+            </div>
+
+            {/* ── Score Panel ─── */}
+            <div className="score-panel result-animate delay-1">
+              <div className="score-ring-wrap">
+                <svg viewBox="0 0 128 128" width="140" height="140">
+                  <circle className="ring-bg" cx="64" cy="64" r="56" />
+                  <circle
+                    className={`ring-fill ${getScoreColor(results.score)}`}
+                    cx="64" cy="64" r="56"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={circumference - (results.score / 100) * circumference}
+                  />
+                </svg>
+                <div className="score-ring-value">
+                  <span className="score-num">{results.score}</span>
+                  <span className="score-label">{getScoreLabel(results.score)}</span>
+                </div>
+              </div>
+
+              <div className="score-details">
+                <div className="score-title">
+                  {getScoreEmoji(results.score)} ATS Match Score
+                </div>
+                <div className="score-subtitle">
+                  Your resume was analyzed against the provided job description using AI-powered keyword and context matching.
+                </div>
+                <div className="score-stats-row">
+                  <div className="score-mini-stat">
+                    <span className="sms-value matched">{results.matchedKeywords?.length || 0}</span>
+                    <span className="sms-label">Matched</span>
+                  </div>
+                  <div className="score-mini-stat">
+                    <span className="sms-value missing">{results.missingKeywords?.length || 0}</span>
+                    <span className="sms-label">Missing</span>
+                  </div>
+                  {results.formatting && (
+                    <div className="score-mini-stat">
+                      <span className="sms-value format">{results.formatting.score || 0}%</span>
+                      <span className="sms-label">Format</span>
                     </div>
-                  </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Keywords ─── */}
+            <div className="keywords-grid result-animate delay-2">
+              <div className="keywords-panel matched-panel">
+                <div className="keywords-panel-header">
+                  <div className="kw-icon matched"><HiCheckCircle /></div>
+                  <span className="kw-title">Matched Keywords</span>
+                  <span className="kw-count matched">{results.matchedKeywords?.length || 0}</span>
+                </div>
+                <div className="keywords-body">
+                  {results.matchedKeywords?.map((kw, i) => (
+                    <span key={i} className="kw-tag matched">{kw}</span>
+                  ))}
+                  {(!results.matchedKeywords || results.matchedKeywords.length === 0) && (
+                    <span className="kw-empty">No matches found</span>
+                  )}
                 </div>
               </div>
 
-              {/* Keywords */}
-              <div className="keywords-wrapper">
-                <div className="keywords-section glass-card">
-                  <h3><HiCheckCircle style={{ color: 'var(--success)' }} /> Matched Keywords</h3>
-                  <div className="keyword-tags">
-                    {results.matchedKeywords?.map((kw, i) => (
-                      <span key={i} className="keyword-tag matched">{kw}</span>
-                    ))}
-                  </div>
+              <div className="keywords-panel missing-panel">
+                <div className="keywords-panel-header">
+                  <div className="kw-icon missing"><HiExclamationCircle /></div>
+                  <span className="kw-title">Missing Keywords</span>
+                  <span className="kw-count missing">{results.missingKeywords?.length || 0}</span>
                 </div>
-
-                <div className="keywords-section glass-card">
-                  <h3><HiExclamationCircle style={{ color: 'var(--warning)' }} /> Missing Keywords</h3>
-                  <div className="keyword-tags">
-                    {results.missingKeywords?.map((kw, i) => (
-                      <span key={i} className="keyword-tag missing">{kw}</span>
-                    ))}
-                  </div>
+                <div className="keywords-body">
+                  {results.missingKeywords?.map((kw, i) => (
+                    <span key={i} className="kw-tag missing">{kw}</span>
+                  ))}
+                  {(!results.missingKeywords || results.missingKeywords.length === 0) && (
+                    <span className="kw-empty">None missing — great job! 🎉</span>
+                  )}
                 </div>
               </div>
+            </div>
 
-              {/* Deep Analysis */}
-              {results.analysis && (
-                <div className="analysis-section glass-card">
-                  <h3><HiDocumentText style={{ color: 'var(--accent-primary)' }} /> Deep Resume Analysis</h3>
-                  <div className="analysis-grid">
-                    {results.analysis.skills && (
-                      <div className="analysis-item">
-                        <h4><HiLightningBolt /> Skills</h4>
-                        <p>{results.analysis.skills}</p>
-                      </div>
-                    )}
-                    {results.analysis.experience && (
-                      <div className="analysis-item">
-                        <h4><HiBriefcase /> Experience</h4>
-                        <p>{results.analysis.experience}</p>
-                      </div>
-                    )}
-                    {results.analysis.education && (
-                      <div className="analysis-item">
-                        <h4><HiAcademicCap /> Education</h4>
-                        <p>{results.analysis.education}</p>
-                      </div>
-                    )}
-                    {results.analysis.projects && (
-                      <div className="analysis-item">
-                        <h4><HiFolder /> Projects</h4>
-                        <p>{results.analysis.projects}</p>
-                      </div>
-                    )}
-                    {results.analysis.overallQuality && (
-                      <div className="analysis-item full-width">
-                        <h4>Overall Quality</h4>
-                        <p>{results.analysis.overallQuality}</p>
-                      </div>
-                    )}
-                  </div>
+            {/* ── Deep Analysis ─── */}
+            {results.analysis && (
+              <div className="analysis-panel result-animate delay-3">
+                <div className="analysis-panel-header">
+                  <div className="a-icon"><HiDocumentText /></div>
+                  <span className="a-title">Deep Resume Analysis</span>
+                  <span className="a-badge">AI Powered</span>
                 </div>
-              )}
-
-              {/* Career Guidance */}
-              {results.careerGuidance && (
-                <div className="guidance-section glass-card">
-                  <h3><HiInformationCircle style={{ color: 'var(--accent-secondary)' }} /> AI Career Guidance</h3>
-                  <div className="guidance-content">
-                    {results.careerGuidance.coachingSuggestions?.length > 0 && (
-                      <div className="guidance-block">
-                        <h4>Coaching Suggestions</h4>
-                        <ul>
-                          {results.careerGuidance.coachingSuggestions.map((s, i) => <li key={i}>{s}</li>)}
-                        </ul>
+                <div className="analysis-grid">
+                  {results.analysis.skills && (
+                    <div className="analysis-cell">
+                      <div className="analysis-cell-header">
+                        <div className="analysis-cell-icon skills"><HiLightningBolt /></div>
+                        <h4>Skills Assessment</h4>
                       </div>
-                    )}
-                    {results.careerGuidance.improvementAreas?.length > 0 && (
-                      <div className="guidance-block">
-                        <h4>Areas to Improve</h4>
-                        <ul>
-                          {results.careerGuidance.improvementAreas.map((s, i) => <li key={i}>{s}</li>)}
-                        </ul>
+                      <p>{results.analysis.skills}</p>
+                    </div>
+                  )}
+                  {results.analysis.experience && (
+                    <div className="analysis-cell">
+                      <div className="analysis-cell-header">
+                        <div className="analysis-cell-icon experience"><HiBriefcase /></div>
+                        <h4>Experience Review</h4>
                       </div>
-                    )}
-                    {results.careerGuidance.enhancementStrategies?.length > 0 && (
-                      <div className="guidance-block">
-                        <h4>Enhancement Strategies</h4>
-                        <ul>
-                          {results.careerGuidance.enhancementStrategies.map((s, i) => <li key={i}>{s}</li>)}
-                        </ul>
+                      <p>{results.analysis.experience}</p>
+                    </div>
+                  )}
+                  {results.analysis.education && (
+                    <div className="analysis-cell">
+                      <div className="analysis-cell-header">
+                        <div className="analysis-cell-icon education"><HiAcademicCap /></div>
+                        <h4>Education</h4>
                       </div>
-                    )}
-                  </div>
+                      <p>{results.analysis.education}</p>
+                    </div>
+                  )}
+                  {results.analysis.projects && (
+                    <div className="analysis-cell">
+                      <div className="analysis-cell-header">
+                        <div className="analysis-cell-icon projects"><HiFolder /></div>
+                        <h4>Projects</h4>
+                      </div>
+                      <p>{results.analysis.projects}</p>
+                    </div>
+                  )}
+                  {results.analysis.certifications && (
+                    <div className="analysis-cell">
+                      <div className="analysis-cell-header">
+                        <div className="analysis-cell-icon certs"><HiShieldCheck /></div>
+                        <h4>Certifications</h4>
+                      </div>
+                      <p>{results.analysis.certifications}</p>
+                    </div>
+                  )}
+                  {results.analysis.overallQuality && (
+                    <div className="analysis-cell full-width highlight">
+                      <div className="analysis-cell-header">
+                        <div className="analysis-cell-icon overall"><HiChartBar /></div>
+                        <h4>Overall Quality Assessment</h4>
+                      </div>
+                      <p>{results.analysis.overallQuality}</p>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Job Recommendations & Direct Apply */}
-              {results.jobRecommendations?.length > 0 && (
-                <div className="jobs-section glass-card">
-                  <h3><HiBriefcase style={{ color: 'var(--success)' }} /> Job Recommendations & Opportunities</h3>
-                  <div className="jobs-grid">
-                    {results.jobRecommendations.map((job, i) => (
-                      <div key={i} className="job-card">
-                        <h4>{job.role}</h4>
-                        <h5>{job.company}</h5>
+            {/* ── Formatting Analysis ─── */}
+            {results.formatting && (
+              <div className="formatting-panel result-animate delay-4">
+                <div className="formatting-panel-header">
+                  <div className="f-icon"><HiClipboardCheck /></div>
+                  <span className="f-title">ATS Formatting Score</span>
+                  <span className={`f-score-badge ${getScoreColor(results.formatting.score)}`}>
+                    {results.formatting.score}%
+                  </span>
+                </div>
+                <div className="formatting-body">
+                  <div className="formatting-progress-wrap">
+                    <div className="formatting-progress-bar">
+                      <div
+                        className={`formatting-progress-fill ${getScoreColor(results.formatting.score)}`}
+                        style={{ width: `${results.formatting.score}%` }}
+                      />
+                    </div>
+                    <span className="formatting-progress-label">
+                      {results.formatting.score >= 80 ? 'ATS-Optimized' :
+                       results.formatting.score >= 60 ? 'Mostly Compatible' :
+                       results.formatting.score >= 40 ? 'Needs Improvement' :
+                       'Poor ATS Compatibility'}
+                    </span>
+                  </div>
+                  {results.formatting.issues?.length > 0 && (
+                    <ul className="formatting-issues">
+                      {results.formatting.issues.map((issue, i) => (
+                        <li key={i} className="formatting-issue-item">
+                          <span className="formatting-issue-icon">
+                            {issue.toLowerCase().includes('great') || issue.toLowerCase().includes('good')
+                              ? <HiCheckCircle className="issue-ok" />
+                              : <HiExclamationCircle className="issue-warn" />}
+                          </span>
+                          <span>{issue}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── Career Guidance ─── */}
+            {results.careerGuidance && (
+              <div className="guidance-panel result-animate delay-5">
+                <div className="guidance-panel-header">
+                  <div className="g-icon"><HiTrendingUp /></div>
+                  <span className="g-title">AI Career Guidance</span>
+                  <span className="g-badge">Personalized</span>
+                </div>
+                <div className="guidance-sections">
+                  {results.careerGuidance.coachingSuggestions?.length > 0 && (
+                    <div className="guidance-block">
+                      <div className="guidance-block-title">
+                        <HiStar className="guidance-block-icon coaching" />
+                        Coaching Suggestions
+                      </div>
+                      <ul className="guidance-list">
+                        {results.careerGuidance.coachingSuggestions.map((s, i) => (
+                          <li key={i} className="guidance-list-item">{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {results.careerGuidance.improvementAreas?.length > 0 && (
+                    <div className="guidance-block">
+                      <div className="guidance-block-title">
+                        <HiTrendingUp className="guidance-block-icon improve" />
+                        Areas to Improve
+                      </div>
+                      <ul className="guidance-list">
+                        {results.careerGuidance.improvementAreas.map((s, i) => (
+                          <li key={i} className="guidance-list-item">{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {results.careerGuidance.missingSkills?.length > 0 && (
+                    <div className="guidance-block">
+                      <div className="guidance-block-title">
+                        <HiCog className="guidance-block-icon skills" />
+                        Missing Skills
+                      </div>
+                      <div className="missing-skills-tags">
+                        {results.careerGuidance.missingSkills.map((s, i) => (
+                          <span key={i} className="missing-skill-tag">{s}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {results.careerGuidance.enhancementStrategies?.length > 0 && (
+                    <div className="guidance-block">
+                      <div className="guidance-block-title">
+                        <HiLightningBolt className="guidance-block-icon strategy" />
+                        Enhancement Strategies
+                      </div>
+                      <ul className="guidance-list">
+                        {results.careerGuidance.enhancementStrategies.map((s, i) => (
+                          <li key={i} className="guidance-list-item">{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {results.careerGuidance.industryGuidance && (
+                    <div className="guidance-block industry-block">
+                      <div className="guidance-block-title">
+                        <HiGlobe className="guidance-block-icon industry" />
+                        Industry Guidance
+                      </div>
+                      <p className="industry-guidance-text">{results.careerGuidance.industryGuidance}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── Job Recommendations ─── */}
+            {results.jobRecommendations?.length > 0 && (
+              <div className="jobs-panel result-animate delay-6">
+                <div className="jobs-panel-header">
+                  <div className="j-icon"><HiBriefcase /></div>
+                  <span className="j-title">Job Recommendations & Opportunities</span>
+                  <span className="j-count">{results.jobRecommendations.length} roles</span>
+                </div>
+                <div className="jobs-grid">
+                  {results.jobRecommendations.map((job, i) => (
+                    <div key={i} className="job-card">
+                      <div className="job-card-top">
+                        <div className="job-card-number">{String(i + 1).padStart(2, '0')}</div>
+                        <div className="job-card-info">
+                          <div className="job-role">{job.role}</div>
+                          <div className="job-company">{job.company}</div>
+                        </div>
+                      </div>
+
+                      {job.opportunity && (
                         <p className="job-opportunity">{job.opportunity}</p>
-                        <div className="job-details">
-                          <strong>Required Skills:</strong>
+                      )}
+
+                      {job.eligibility && (
+                        <div className="job-eligibility">
+                          <span className="job-meta-label">Eligibility</span>
+                          <span className="job-meta-value">{job.eligibility}</span>
+                        </div>
+                      )}
+
+                      {job.qualifications?.length > 0 && (
+                        <div className="job-qualifications">
+                          <span className="job-meta-label">Qualifications</span>
+                          <ul className="job-qual-list">
+                            {job.qualifications.map((q, j) => (
+                              <li key={j}>{q}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {job.skills?.length > 0 && (
+                        <div className="job-skills-section">
+                          <span className="job-meta-label">Required Skills</span>
                           <div className="job-skills">
-                            {job.skills?.map((s, j) => <span key={j}>{s}</span>)}
+                            {job.skills.map((s, j) => (
+                              <span key={j} className="job-skill-tag">{s}</span>
+                            ))}
                           </div>
                         </div>
-                        <button 
-                          className="btn btn-primary btn-sm direct-apply-btn"
-                          onClick={() => window.open(job.applicationUrl || `https://www.google.com/search?q=${encodeURIComponent(job.role + ' ' + job.company + ' jobs')}`, '_blank')}
-                        >
-                          Direct Apply
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                      )}
+
+                      <button
+                        className="job-apply-btn"
+                        onClick={() => window.open(job.applicationUrl || `https://www.google.com/search?q=${encodeURIComponent(job.role + ' ' + job.company + ' jobs')}`, '_blank')}
+                      >
+                        <HiExternalLink /> Apply Now
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+
+          </div>
+        )}
+
       </div>
     </div>
   );

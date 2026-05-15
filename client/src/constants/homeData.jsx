@@ -17,6 +17,7 @@ export const brands = [
   { name: 'Accenture', image: '/brand-images/Accenture.webp' },
   { name: 'HDFC', image: '/brand-images/HDFC_Bank.png' },
   { name: 'Airtel', image: '/brand-images/airtel-logo.png' },
+  { name: 'TCS', image: '/brand-images/Tata_Consultancy_Services.png' }
 ];
 
 /** Floating badge cards around the hero image. */
