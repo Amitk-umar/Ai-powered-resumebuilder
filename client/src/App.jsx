@@ -13,6 +13,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import Success from './pages/Success';
 import Cancel from './pages/Cancel';
+import { Analytics } from "@vercel/analytics/react";
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -80,6 +81,7 @@ export default function App() {
       <Router>
         <AuthProvider>
           <AppRoutes />
+          <Analytics />
         </AuthProvider>
       </Router>
     </ThemeProvider>
