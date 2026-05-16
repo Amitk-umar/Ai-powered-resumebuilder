@@ -4,7 +4,7 @@ const pdfParse = require('pdf-parse');
 class AIService {
   constructor() {
     this.client = new OpenAI({
-      apiKey: process.env.NVIDIA_API_KEY || '',
+      apiKey: process.env.NVIDIA_API_KEY || 'missing-key-prevent-crash',
       baseURL: 'https://integrate.api.nvidia.com/v1',
     });
   }
