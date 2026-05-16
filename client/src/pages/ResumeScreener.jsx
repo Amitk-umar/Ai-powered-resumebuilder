@@ -40,7 +40,32 @@ export default function ResumeScreener() {
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [planLimits, setPlanLimits] = useState({ reached: false, message: '' });
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (user) loadPlan();
+  }, [user]);
+
+  const loadPlan = async () => {
+    try {
+      const res = await api.get('/plans/me');
+      if (!res.ok) return;
+      const data = await res.json();
+      
+      const currentScans = data.userPlan?.screeningsCount || user?.screeningsCount || 0;
+      const maxScans = data.plan?.maxAtsScans || 3;
+      
+      if (currentScans >= maxScans) {
+        setPlanLimits({ 
+          reached: true, 
+          message: `ATS Scan limit reached (${currentScans}/${maxScans}). Upgrade your plan to scan more resumes.` 
+        });
+      }
+    } catch (error) {
+      console.log('Plan load skipped:', error.message);
+    }
+  };
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -107,11 +132,25 @@ export default function ResumeScreener() {
 
       if (response.ok) {
         const data = await response.json();
+        // Normalize score on frontend too (guard against AI returning 0-1 decimal)
+        if (data.score !== undefined && data.score > 0 && data.score <= 1) {
+          data.score = Math.round(data.score * 100);
+        }
+        if (data.score !== undefined) {
+          data.score = Math.min(100, Math.max(0, Math.round(data.score)));
+        }
+        if (data.formatting?.score !== undefined && data.formatting.score > 0 && data.formatting.score <= 1) {
+          data.formatting.score = Math.round(data.formatting.score * 100);
+        }
         setResults(data);
         await saveScreening(file.name, data);
+        loadPlan(); // Reload plan to update counts
       } else {
         const errData = await response.json();
         alert('Analysis failed: ' + (errData.error || 'Unknown error'));
+        if (response.status === 403 && errData.error.includes('limit')) {
+          loadPlan();
+        }
       }
     } catch (err) {
       console.error('Analysis error:', err);
@@ -141,24 +180,31 @@ export default function ResumeScreener() {
   };
 
   const getScoreColor = (score) => {
-    if (score >= 80) return 'excellent';
-    if (score >= 60) return 'good';
-    if (score >= 40) return 'average';
+    if (score >= 85) return 'excellent';
+    if (score >= 70) return 'good';
+    if (score >= 50) return 'average';
     return 'poor';
   };
 
   const getScoreLabel = (score) => {
-    if (score >= 80) return 'Excellent';
-    if (score >= 60) return 'Good';
-    if (score >= 40) return 'Needs Work';
-    return 'Poor';
+    if (score >= 85) return 'Excellent Match';
+    if (score >= 70) return 'Good Match';
+    if (score >= 50) return 'Moderate Match';
+    if (score >= 30) return 'Low Match';
+    return 'Poor Match';
   };
 
   const getScoreEmoji = (score) => {
-    if (score >= 80) return '🎯';
-    if (score >= 60) return '👍';
-    if (score >= 40) return '⚡';
+    if (score >= 85) return '🎯';
+    if (score >= 70) return '✅';
+    if (score >= 50) return '⚡';
     return '⚠️';
+  };
+
+  const getKeywordMatchRate = () => {
+    const total = (results?.matchedKeywords?.length || 0) + (results?.missingKeywords?.length || 0);
+    if (total === 0) return 0;
+    return Math.round((results.matchedKeywords.length / total) * 100);
   };
 
   const circumference = 2 * Math.PI * 56;
@@ -243,23 +289,32 @@ export default function ResumeScreener() {
         </div>
 
         {/* ── Analyze Button ───────────────── */}
-        <button
-          className="analyze-btn"
-          onClick={analyzeResume}
-          disabled={!file || !jobDescription.trim() || analyzing}
-          id="analyze-resume-btn"
-        >
-          {analyzing ? (
-            <>
-              <span className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }}></span>
-              Analyzing via AI…
-            </>
-          ) : (
-            <>
-              <HiLightningBolt /> Analyze with AI
-            </>
+        <div className="flex flex-col items-center gap-4 mt-8">
+          <button
+            className="analyze-btn"
+            onClick={analyzeResume}
+            disabled={!file || !jobDescription.trim() || analyzing || planLimits.reached}
+            id="analyze-resume-btn"
+          >
+            {analyzing ? (
+              <>
+                <span className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }}></span>
+                Analyzing via AI…
+              </>
+            ) : (
+              <>
+                <HiLightningBolt /> Analyze with AI
+              </>
+            )}
+          </button>
+          
+          {planLimits.reached && (
+            <div className="text-red-400 text-sm font-medium bg-red-500/10 px-4 py-2 rounded-lg border border-red-500/20 flex items-center gap-2">
+              <HiExclamationCircle className="w-5 h-5" />
+              {planLimits.message}
+            </div>
           )}
-        </button>
+        </div>
 
         {/* ── Results ──────────────────────── */}
         {results && (
@@ -283,6 +338,7 @@ export default function ResumeScreener() {
                 </svg>
                 <div className="score-ring-value">
                   <span className="score-num">{results.score}</span>
+                  <span className="score-pct">/ 100</span>
                   <span className="score-label">{getScoreLabel(results.score)}</span>
                 </div>
               </div>
@@ -292,23 +348,42 @@ export default function ResumeScreener() {
                   {getScoreEmoji(results.score)} ATS Match Score
                 </div>
                 <div className="score-subtitle">
-                  Your resume was analyzed against the provided job description using AI-powered keyword and context matching.
+                  Scored using keyword match (40%), semantic relevance (25%), section completeness (20%), and formatting (15%).
                 </div>
+
+                {/* Score breakdown bars */}
+                <div className="score-breakdown">
+                  <div className="breakdown-row">
+                    <span className="breakdown-label">Keyword Match</span>
+                    <div className="breakdown-bar-wrap">
+                      <div className="breakdown-bar" style={{ width: `${getKeywordMatchRate()}%` }} />
+                    </div>
+                    <span className="breakdown-pct">{getKeywordMatchRate()}%</span>
+                  </div>
+                  {results.formatting && (
+                    <div className="breakdown-row">
+                      <span className="breakdown-label">ATS Formatting</span>
+                      <div className="breakdown-bar-wrap">
+                        <div className="breakdown-bar formatting" style={{ width: `${results.formatting.score || 0}%` }} />
+                      </div>
+                      <span className="breakdown-pct">{results.formatting.score || 0}%</span>
+                    </div>
+                  )}
+                </div>
+
                 <div className="score-stats-row">
                   <div className="score-mini-stat">
                     <span className="sms-value matched">{results.matchedKeywords?.length || 0}</span>
-                    <span className="sms-label">Matched</span>
+                    <span className="sms-label">Keywords Matched</span>
                   </div>
                   <div className="score-mini-stat">
                     <span className="sms-value missing">{results.missingKeywords?.length || 0}</span>
-                    <span className="sms-label">Missing</span>
+                    <span className="sms-label">Keywords Missing</span>
                   </div>
-                  {results.formatting && (
-                    <div className="score-mini-stat">
-                      <span className="sms-value format">{results.formatting.score || 0}%</span>
-                      <span className="sms-label">Format</span>
-                    </div>
-                  )}
+                  <div className="score-mini-stat">
+                    <span className="sms-value format">{getKeywordMatchRate()}%</span>
+                    <span className="sms-label">Match Rate</span>
+                  </div>
                 </div>
               </div>
             </div>

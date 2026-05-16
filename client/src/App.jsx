@@ -11,6 +11,8 @@ import ResumeBuilder from './pages/ResumeBuilder';
 import ResumeScreener from './pages/ResumeScreener';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import Success from './pages/Success';
+import Cancel from './pages/Cancel';
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -64,6 +66,8 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route path="/checkout/success" element={<Success />} />
+        <Route path="/checkout/cancel" element={<Cancel />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </>

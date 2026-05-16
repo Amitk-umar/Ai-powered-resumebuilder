@@ -180,13 +180,26 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="dashboard-actions fade-in-up delay-2">
-          <Link to="/builder" className="action-card glass-card">
-            <div className="action-icon" style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}>
-              <HiPlusCircle />
-            </div>
-            <h3>Create Resume</h3>
-            <p>Build a new ATS-friendly resume</p>
-          </Link>
+          {planInfo?.plan?.maxResumes > 0 && resumes.length >= planInfo.plan.maxResumes ? (
+            <button 
+              className="action-card glass-card text-left w-full cursor-not-allowed opacity-80"
+              onClick={() => alert(`Resume limit reached (${resumes.length}/${planInfo.plan.maxResumes}). Please upgrade your plan to create more resumes.`)}
+            >
+              <div className="action-icon" style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}>
+                <HiExclamationCircle />
+              </div>
+              <h3>Resume Limit Reached</h3>
+              <p>Upgrade to create more resumes</p>
+            </button>
+          ) : (
+            <Link to="/builder" className="action-card glass-card">
+              <div className="action-icon" style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}>
+                <HiPlusCircle />
+              </div>
+              <h3>Create Resume</h3>
+              <p>Build a new ATS-friendly resume</p>
+            </Link>
+          )}
           <Link to="/screener" className="action-card glass-card">
             <div className="action-icon" style={{ background: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }}>
               <HiSearch />
@@ -263,9 +276,15 @@ export default function Dashboard() {
         <div className="dashboard-resumes fade-in-up delay-3">
           <div className="resumes-header">
             <h2>My Resumes</h2>
-            <Link to="/builder" className="btn btn-primary btn-sm">
-              <HiPlusCircle /> New Resume
-            </Link>
+            {planInfo?.plan?.maxResumes > 0 && resumes.length >= planInfo.plan.maxResumes ? (
+              <button className="btn btn-primary btn-sm opacity-50 cursor-not-allowed" onClick={() => alert(`Resume limit reached (${resumes.length}/${planInfo.plan.maxResumes}). Please upgrade your plan.`)}>
+                <HiPlusCircle /> Limit Reached
+              </button>
+            ) : (
+              <Link to="/builder" className="btn btn-primary btn-sm">
+                <HiPlusCircle /> New Resume
+              </Link>
+            )}
           </div>
 
           {resumes.length === 0 ? (

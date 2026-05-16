@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema({
     },
     status: {
       type: String,
-      enum: ['active', 'expired'],
+      enum: ['active', 'expired', 'canceled', 'past_due', 'unpaid'],
       default: 'active'
     },
     startedAt: {
@@ -47,6 +47,18 @@ const userSchema = new mongoose.Schema({
       type: Date,
       default: null
     }
+  },
+  stripeCustomerId: {
+    type: String,
+    default: null
+  },
+  stripeSubscriptionId: {
+    type: String,
+    default: null
+  },
+  stripePriceId: {
+    type: String,
+    default: null
   },
   resumes: [{
     type: mongoose.Schema.Types.ObjectId,

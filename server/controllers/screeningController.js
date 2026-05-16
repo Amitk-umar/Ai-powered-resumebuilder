@@ -1,5 +1,5 @@
 const multer = require('multer');
-const aiService = require('../services/aiService');
+const aiServiceInstance = require('../services/aiService');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 
@@ -29,13 +29,22 @@ exports.screenResume = asyncHandler(async (req, res) => {
   const { jobDescription } = req.body;
   if (!jobDescription?.trim()) throw new ApiError(400, 'Job description is required');
 
-  let resumeText = req.body.resumeText;
-  
-  if (!resumeText) {
-    if (req.file.mimetype === 'application/pdf') {
-      resumeText = await aiService.constructor.extractText(req.file.buffer);
-    } else {
-      resumeText = req.file.buffer.toString('utf-8');
+  // Prefer the pre-extracted text sent by the client (already extracted via pdfjs-dist)
+  let resumeText = req.body.resumeText || '';
+
+  // Fall back to server-side extraction only if client didn't send text
+  if (!resumeText.trim()) {
+    try {
+      if (req.file.mimetype === 'application/pdf') {
+        const pdfParse = require('pdf-parse');
+        const parse = typeof pdfParse === 'function' ? pdfParse : (pdfParse.default || pdfParse.PDFParse);
+        const data = await parse(req.file.buffer);
+        resumeText = data.text || '';
+      } else {
+        resumeText = req.file.buffer.toString('utf-8');
+      }
+    } catch (extractErr) {
+      console.error('Server-side PDF extraction failed:', extractErr.message);
     }
   }
 
@@ -45,6 +54,11 @@ exports.screenResume = asyncHandler(async (req, res) => {
     );
   }
 
-  const results = await aiService.analyzeResumeVsJD(resumeText, jobDescription);
-  res.json(results);
+  try {
+    const results = await aiServiceInstance.analyzeResumeVsJD(resumeText, jobDescription);
+    res.json(results);
+  } catch (aiErr) {
+    console.error('AI analysis failed:', aiErr.message);
+    throw new ApiError(500, 'AI analysis failed: ' + aiErr.message);
+  }
 });

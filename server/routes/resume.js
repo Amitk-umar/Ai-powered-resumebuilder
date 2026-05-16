@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
+const { checkResumeLimit } = require('../middleware/planLimits');
 const {
   getResumes,
   getResume,
@@ -14,7 +15,7 @@ router.use(authMiddleware);
 
 router.get('/', getResumes);
 router.get('/:id', getResume);
-router.post('/', createResume);
+router.post('/', checkResumeLimit, createResume);
 router.put('/:id', updateResume);
 router.delete('/:id', deleteResume);
 

@@ -3,28 +3,37 @@ const PLANS = {
     name: 'basic',
     label: 'Basic',
     templates: ['Modern', 'Professional', 'Minimal'],
-    resumeLimitText: '3 resumes total',
+    resumeLimitText: '1 resume total',
+    maxResumes: 1,
+    maxAtsScans: 3,
     downloadPdf: true,
-    screeningHistory: true
+    screeningHistory: true,
+    stripePriceId: null
   },
   pro: {
     name: 'pro',
     label: 'Pro',
     templates: ['Modern', 'Professional', 'Minimal', 'Creative', 'Executive'],
-    resumeLimitText: '3 resumes per week',
+    resumeLimitText: '5 resumes total',
+    maxResumes: 5,
+    maxAtsScans: 50,
     durationDays: 30,
     downloadPdf: true,
-    screeningHistory: true
+    screeningHistory: true,
+    stripePriceId: 'price_1TXjlXKFqx4P8r4M3KlQB3fu'
   },
   premium: {
     name: 'premium',
     label: 'Premium',
     templates: ['Modern', 'Professional', 'Minimal', 'Creative', 'Executive', 'ATS Focused', 'Technical'],
-    resumeLimitText: '20 resumes per month',
+    resumeLimitText: 'Unlimited resumes',
+    maxResumes: 999999, // practically unlimited
+    maxAtsScans: 999999,
     durationDays: 30,
     downloadPdf: true,
     screeningHistory: true,
-    companySuggestions: true
+    companySuggestions: true,
+    stripePriceId: 'price_1TXjlYKFqx4P8r4MyzxPg7H5'
   }
 };
 
