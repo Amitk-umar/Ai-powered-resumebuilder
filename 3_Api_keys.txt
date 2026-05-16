@@ -9,7 +9,7 @@ option 1 :GLM5.1
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  apiKey: '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',
+  apiKey: 'NVIDIA_API_KEY_MOVED_TO_ENV',
   baseURL: 'https://integrate.api.nvidia.com/v1',
 })
  

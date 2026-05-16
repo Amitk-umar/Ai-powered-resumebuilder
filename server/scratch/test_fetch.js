@@ -1,5 +1,6 @@
+require('dotenv').config({ path: '../.env' });
 const url = 'https://integrate.api.nvidia.com/v1/chat/completions';
-const key = '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';
+const key = process.env.NVIDIA_API_KEY;
 
 fetch(url, {
   method: 'POST',
