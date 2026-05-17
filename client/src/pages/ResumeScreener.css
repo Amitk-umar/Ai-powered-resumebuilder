@@ -137,7 +137,6 @@
 .upload-zone.drag-active {
   border-color: var(--accent-primary);
   background: rgba(99, 102, 241, 0.08);
-  transform: scale(1.01);
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08);
 }
 
@@ -168,7 +167,6 @@
 
 .upload-zone:hover .upload-icon-wrap {
   background: rgba(99, 102, 241, 0.18);
-  transform: scale(1.1);
   box-shadow: 0 0 24px rgba(99, 102, 241, 0.2);
 }
 
@@ -278,14 +276,12 @@
 }
 
 .analyze-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
   box-shadow: 0 10px 32px rgba(99, 102, 241, 0.4);
 }
 
 .analyze-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-  transform: none;
 }
 
 .analyze-btn .spinner {
@@ -635,7 +631,6 @@
 
 .kw-tag.matched:hover {
   background: rgba(16, 185, 129, 0.15);
-  transform: translateY(-1px);
 }
 
 .kw-tag.missing {
@@ -646,7 +641,6 @@
 
 .kw-tag.missing:hover {
   background: rgba(245, 158, 11, 0.15);
-  transform: translateY(-1px);
 }
 
 /* ─── Analysis Section ────────────────────── */
@@ -898,7 +892,6 @@
 }
 
 .job-card:hover {
-  transform: translateY(-3px);
   border-color: rgba(99,102,241,0.2);
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
@@ -973,7 +966,6 @@
 
 .job-apply-btn:hover {
   box-shadow: 0 4px 16px rgba(99,102,241,0.3);
-  transform: translateY(-1px);
 }
 
 /* ─── Responsive ──────────────────────────── */

@@ -49,7 +49,7 @@ export default function HeroSection({ user, runAtsScan, isMobile, isTablet }) {
               Start For Free <ArrowRight className="w-5 h-5" />
             </Link>
             <button onClick={runAtsScan} className="px-8 py-4 rounded-2xl font-bold premium-btn-secondary flex items-center gap-2">
-              <Play className="w-4 h-4 text-cyan-400 fill-cyan-400" /> Watch Live Scan
+              <Play className="w-4 h-4 bi bi-play" /> Watch Live Scan
             </button>
           </motion.div>
 
@@ -90,7 +90,7 @@ export default function HeroSection({ user, runAtsScan, isMobile, isTablet }) {
             <img
               src="/professional.png"
               alt="Job Ready Tech Professional"
-              className="w-[88%] h-[88%] object-contain relative z-10 transform hover:scale-105 transition-transform duration-700 pointer-events-auto"
+              className="w-[88%] h-[88%] object-contain relative z-10 pointer-events-auto"
               onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop"; }}
             />
           </motion.div>
@@ -111,7 +111,7 @@ export default function HeroSection({ user, runAtsScan, isMobile, isTablet }) {
                   x: { duration: 0.6, delay: card.delay },
                   y: { repeat: Infinity, duration: 4 + (i % 3), ease: 'easeInOut' },
                 }}
-                className="absolute z-20 px-2 py-1 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl border border-white/20 text-[9px] sm:text-xs font-bold text-white flex items-center gap-1.5 cursor-default hover:scale-105 transition-all duration-300"
+                className="absolute z-20 px-2 py-1 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl border border-white/20 text-[9px] sm:text-xs font-bold text-white flex items-center gap-1.5 cursor-default transition-all duration-300"
                 style={{ background: card.bg, backgroundSize: '200% auto', boxShadow: `0 4px 15px ${card.shadow}` }}
               >
                 <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />

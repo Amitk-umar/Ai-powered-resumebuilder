@@ -33,7 +33,7 @@ export default function BrandStrip() {
                 <img
                   src={brand.image}
                   alt={`${brand.name} logo`}
-                  className="w-full h-full object-contain filter grayscale opacity-40 dark:opacity-50 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 group-hover:drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-500 ease-out"
+                  className="w-full h-full object-contain filter grayscale opacity-40 dark:opacity-50 group-hover:grayscale-0 group-hover:opacity-100 group-hover:drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-500 ease-out"
                   loading="lazy"
                 />
               </div>
