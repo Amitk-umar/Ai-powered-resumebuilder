@@ -6,27 +6,6 @@ const asyncHandler = require('../utils/asyncHandler');
 
 // ── Helpers ────────────────────────────────────────────
 
-/** Returns a date filter scoped to the plan's billing window. */
-function getPlanDateFilter(planName) {
-  const now = new Date();
-  if (planName === 'pro') {
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - 7);
-    return { createdAt: { $gte: weekStart } };
-  }
-  if (planName === 'premium') {
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    return { createdAt: { $gte: monthStart } };
-  }
-  return {};
-}
-
-/** Returns the max resume count allowed for a plan. */
-function getPlanLimit(planName) {
-  const limits = { pro: 3, premium: 20 };
-  return limits[planName] || 3;
-}
-
 // ── Controllers ────────────────────────────────────────
 
 /** GET /api/resumes — list all resumes for the authenticated user. */
@@ -53,16 +32,7 @@ exports.createResume = asyncHandler(async (req, res) => {
   const user = await User.findOne({ firebaseUid: req.user.uid });
   const plan = getActivePlan(user);
 
-  // Check quota
-  const count = await Resume.countDocuments({
-    userId: req.user.uid,
-    ...getPlanDateFilter(plan.name),
-  });
-  if (count >= getPlanLimit(plan.name)) {
-    throw new ApiError(403,
-      `Your ${plan.label} plan allows ${plan.resumeLimitText}. Please upgrade or wait for the limit to reset.`
-    );
-  }
+  // Quota is now checked by checkResumeLimit middleware
 
   // Check template access
   const selectedTemplate = template || 'Modern';

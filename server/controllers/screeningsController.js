@@ -34,6 +34,13 @@ exports.saveScreening = asyncHandler(async (req, res) => {
     formatting: formatting || { score: 0, issues: [] },
   });
 
+  // Increment user's screenings count
+  const User = require('../models/User');
+  await User.findOneAndUpdate(
+    { firebaseUid: req.user.uid },
+    { $inc: { screeningsCount: 1 } }
+  );
+
   res.status(201).json(screening);
 });
 

@@ -5,7 +5,8 @@ import FloatingOrbs from '../components/FloatingOrbs';
 import {
   HiUser, HiAcademicCap, HiBriefcase, HiCode,
   HiFolder, HiArrowRight, HiArrowLeft, HiDownload,
-  HiSave, HiEye, HiTemplate, HiPlus, HiTrash
+  HiSave, HiEye, HiTemplate, HiPlus, HiTrash,
+  HiSparkles, HiLockClosed
 } from 'react-icons/hi';
 import './ResumeBuilder.css';
 
@@ -17,7 +18,7 @@ const STEPS = [
   { id: 'projects', label: 'Projects', icon: <HiFolder /> },
 ];
 
-const TEMPLATES = ['Modern', 'Professional', 'Minimal'];
+const TEMPLATES = ['Modern', 'Professional', 'Minimal', 'Creative', 'Executive', 'ATS Focused', 'Technical'];
 
 const emptyResume = {
   personal: { name: '', email: '', phone: '', location: '', summary: '', linkedin: '', website: '' },
@@ -110,6 +111,34 @@ export default function ResumeBuilder() {
     setData(prev => ({ ...prev, skills: { ...prev.skills, [field]: value } }));
   };
 
+  const handleRewrite = async (text, onUpdate) => {
+    if (!text || text.length < 5) return alert('Please write a bit more before rewriting.');
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/rewrite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ text, tone: 'professional' })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        onUpdate(data.text);
+      } else {
+        if (res.status === 403) {
+          alert('AI Rewrite is a Pro/Premium feature. Please upgrade your plan.');
+        } else {
+          alert(data.error || 'Failed to rewrite text');
+        }
+      }
+    } catch (err) {
+      console.error('Rewrite error:', err);
+      alert('Failed to connect to AI service.');
+    }
+  };
+
   const saveResume = async () => {
     const params = new URLSearchParams(window.location.search);
     const existingId = params.get('id');
@@ -176,15 +205,19 @@ export default function ResumeBuilder() {
           </div>
           <div className="builder-header-actions">
             <div className="template-selector">
-              {planTemplates.map(t => (
-                <button
-                  key={t}
-                  className={`template-btn ${template === t ? 'active' : ''}`}
-                  onClick={() => setTemplate(t)}
-                >
-                  <HiTemplate /> {t}
-                </button>
-              ))}
+              {TEMPLATES.map(t => {
+                const isAvailable = planTemplates.includes(t);
+                return (
+                  <button
+                    key={t}
+                    className={`template-btn ${template === t ? 'active' : ''} ${!isAvailable ? 'locked' : ''}`}
+                    onClick={() => isAvailable ? setTemplate(t) : alert(`${t} template is not available in your current plan. Please upgrade to use it.`)}
+                    title={isAvailable ? `Use ${t} template` : `Upgrade plan to unlock ${t} template`}
+                  >
+                    {!isAvailable ? <HiLockClosed className="lock-icon" /> : <HiTemplate />} {t}
+                  </button>
+                );
+              })}
             </div>
             <button className="btn btn-secondary btn-sm" onClick={() => setShowPreview(!showPreview)}>
               <HiEye /> {showPreview ? 'Editor' : 'Preview'}
@@ -250,7 +283,16 @@ export default function ResumeBuilder() {
                     </div>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Professional Summary</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label className="form-label" style={{ marginBottom: 0 }}>Professional Summary</label>
+                      <button 
+                        className="btn btn-ghost btn-sm" 
+                        onClick={() => handleRewrite(data.personal.summary, (newText) => updatePersonal('summary', newText))}
+                        title="AI Rewrite (Pro/Premium feature)"
+                      >
+                        <HiSparkles className="text-primary" /> AI Rewrite
+                      </button>
+                    </div>
                     <textarea className="form-input form-textarea" rows="4" placeholder="Brief summary of your professional background..." value={data.personal.summary} onChange={e => updatePersonal('summary', e.target.value)} />
                   </div>
                 </div>
@@ -348,7 +390,16 @@ export default function ResumeBuilder() {
                         </label>
                       </div>
                       <div className="form-group">
-                        <label className="form-label">Description</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <label className="form-label" style={{ marginBottom: 0 }}>Description</label>
+                          <button 
+                            className="btn btn-ghost btn-sm" 
+                            onClick={() => handleRewrite(exp.description, (newText) => updateItem('experience', i, 'description', newText))}
+                            title="AI Rewrite (Pro/Premium feature)"
+                          >
+                            <HiSparkles className="text-primary" /> AI Rewrite
+                          </button>
+                        </div>
                         <textarea className="form-input form-textarea" rows="4" placeholder="• Led a team of 5 engineers...&#10;• Increased performance by 40%..." value={exp.description} onChange={e => updateItem('experience', i, 'description', e.target.value)} />
                       </div>
                     </div>

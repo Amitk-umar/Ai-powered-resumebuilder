@@ -12,19 +12,36 @@ export default function Success() {
   const [status, setStatus] = useState('processing'); // processing, success, error
 
   useEffect(() => {
-    // In a real production app, you might want to call your backend 
-    // here to verify the session_id and force a user token refresh.
-    // Since we rely on Stripe webhooks, we'll just wait a few seconds
-    // to give the webhook time to process, then redirect.
-    if (sessionId) {
-      const timer = setTimeout(() => {
-        setStatus('success');
-      }, 2500);
-      return () => clearTimeout(timer);
-    } else {
-      setStatus('error');
+    const verifySession = async () => {
+      if (!sessionId) {
+        setStatus('error');
+        return;
+      }
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/billing/verify-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await user.getIdToken()}`
+          },
+          body: JSON.stringify({ sessionId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setStatus('success');
+        } else {
+          setStatus('error');
+        }
+      } catch (err) {
+        console.error('Failed to verify session:', err);
+        setStatus('error');
+      }
+    };
+
+    if (user) {
+      verifySession();
     }
-  }, [sessionId]);
+  }, [sessionId, user]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative">
@@ -52,7 +69,7 @@ export default function Success() {
               Thank you for upgrading! Your subscription is now active and premium features have been unlocked.
             </p>
             <button 
-              onClick={() => navigate('/builder')}
+              onClick={() => navigate('/dashboard')}
               className="mt-8 px-8 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl flex items-center gap-2 transition-colors"
             >
               Go to Dashboard <ArrowRight className="w-5 h-5" />

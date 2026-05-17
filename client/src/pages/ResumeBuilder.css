@@ -65,6 +65,22 @@
   color: var(--accent-primary);
 }
 
+.template-btn.locked {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg-secondary);
+}
+
+.template-btn.locked:hover {
+  border-color: var(--glass-border);
+  color: var(--text-secondary);
+}
+
+.lock-icon {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
 /* Progress */
 .builder-progress {
   margin-bottom: var(--space-xl);

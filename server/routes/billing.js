@@ -58,6 +58,43 @@ router.post('/checkout-session', authMiddleware, asyncHandler(async (req, res) =
   res.json({ url: session.url });
 }));
 
+// Verify Checkout Session (Manually updates DB to prevent relying solely on webhooks)
+router.post('/verify-session', authMiddleware, asyncHandler(async (req, res) => {
+  const { sessionId } = req.body;
+  if (!sessionId) {
+    throw new ApiError(400, 'Session ID is required');
+  }
+
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  if (session.payment_status !== 'paid') {
+    throw new ApiError(400, 'Payment not successful');
+  }
+
+  const userId = session.client_reference_id || session.metadata?.userId;
+  const subscriptionId = session.subscription;
+  const customerId = session.customer;
+
+  if (userId) {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const priceId = subscription.items.data[0].price.id;
+    const planKey = getPlanKeyByPriceId(priceId);
+
+    const user = await User.findByIdAndUpdate(userId, {
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscriptionId,
+      stripePriceId: priceId,
+      'plan.name': planKey,
+      'plan.status': subscription.status,
+      'plan.startedAt': new Date(subscription.current_period_start * 1000),
+      'plan.expiresAt': new Date(subscription.current_period_end * 1000)
+    }, { new: true });
+
+    return res.json({ success: true, plan: user.plan });
+  }
+
+  res.json({ success: false, message: 'User not identified in session' });
+}));
+
 // Customer Portal
 router.post('/portal', authMiddleware, asyncHandler(async (req, res) => {
   const user = await User.findOne({ firebaseUid: req.user.uid });

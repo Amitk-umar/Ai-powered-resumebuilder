@@ -51,15 +51,18 @@ export default function Dashboard() {
     setLoadingData(false);
   };
 
-  const requestPlan = async (requestedPlan) => {
+  const requestPlan = async (planKey) => {
     try {
-      const res = await api.post('/plans/request', { requestedPlan });
+      const res = await api.post('/billing/checkout-session', { planKey });
       const data = await res.json();
-      if (!res.ok) return alert(data.error || 'Could not request plan');
-      alert('Upgrade request sent to admin.');
-      fetchDashboardData();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Could not initiate checkout');
+      }
     } catch (err) {
-      alert('Could not request plan: ' + err.message);
+      console.error('Checkout error:', err);
+      alert('Failed to initiate checkout. Please try again.');
     }
   };
 
@@ -138,12 +141,27 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="plan-actions">
-            <button className="btn btn-secondary btn-sm" disabled={!!planInfo?.pendingRequest} onClick={() => requestPlan('pro')}>
-              Upgrade Pro
-            </button>
-            <button className="btn btn-primary btn-sm" disabled={!!planInfo?.pendingRequest} onClick={() => requestPlan('premium')}>
-              Upgrade Premium
-            </button>
+            {planInfo?.plan?.name !== 'pro' && planInfo?.plan?.name !== 'premium' && (
+              <button className="btn btn-secondary btn-sm" onClick={() => requestPlan('pro')}>
+                Upgrade to Pro
+              </button>
+            )}
+            {planInfo?.plan?.name !== 'premium' && (
+              <button className="btn btn-primary btn-sm" onClick={() => requestPlan('premium')}>
+                Upgrade to Premium
+              </button>
+            )}
+            {(planInfo?.plan?.name === 'pro' || planInfo?.plan?.name === 'premium') && (
+              <button className="btn btn-secondary btn-sm" onClick={async () => {
+                try {
+                  const res = await api.post('/billing/portal');
+                  const data = await res.json();
+                  if (data.url) window.location.href = data.url;
+                } catch (e) { alert('Could not open billing portal'); }
+              }}>
+                Manage Subscription
+              </button>
+            )}
           </div>
         </div>
 

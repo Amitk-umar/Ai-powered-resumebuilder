@@ -141,6 +141,39 @@ ${jobDescription}`;
       throw new Error('Failed to analyze resume with AI: ' + (error?.message || error));
     }
   }
+
+  async rewriteText(text, tone = 'professional') {
+    const systemPrompt = `You are an expert resume writer. Your task is to rewrite the provided resume bullet point or text to be more impactful, professional, and results-oriented.
+    
+    TONE: ${tone}
+    
+    RULES:
+    1. Start with a strong action verb.
+    2. Quantify results where possible (if the original implies metrics, emphasize them).
+    3. Keep it concise (1-2 sentences maximum).
+    4. Do not add made-up numbers if none exist or aren't implied.
+    5. Return ONLY the rewritten text, no explanations, no quotes, no formatting.`;
+
+    try {
+      console.log('Calling GLM-5.1 for Rewrite...');
+      const completion = await this.client.chat.completions.create({
+        model: 'z-ai/glm-5.1',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: text },
+        ],
+        temperature: 0.5,
+        max_tokens: 200,
+        stream: false,
+      });
+
+      let content = completion.choices[0]?.message?.content || '';
+      return content.trim();
+    } catch (error) {
+      console.error('AI Rewrite Error:', error?.message || error);
+      throw new Error('Failed to rewrite text: ' + (error?.message || error));
+    }
+  }
 }
 
 module.exports = new AIService();
