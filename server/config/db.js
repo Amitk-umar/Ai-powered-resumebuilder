@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/resumebuilder');
+    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/resumebuilder', {
+      serverSelectionTimeoutMS: 5000, // Fail fast if DB is unreachable (5 seconds instead of 30)
+    });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error('MongoDB connection error:', error.message);

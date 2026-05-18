@@ -56,7 +56,13 @@ app.use('/api/ai', require('./routes/ai'));
 
 // Health check
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const mongoose = require('mongoose');
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    dbState: mongoose.connection.readyState 
+    // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+  });
 });
 
 // ── Error Handling ─────────────────────────────────────

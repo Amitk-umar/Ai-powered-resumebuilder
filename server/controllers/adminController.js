@@ -22,7 +22,17 @@ exports.getDashboard = asyncHandler(async (_req, res) => {
     { $sort: { _id: 1 } }
   ];
 
-  const [users, contacts, requests, resumesThisMonth, screeningsCount, topSkillsAgg, usersTs, resumesTs, screeningsTs] = await Promise.all([
+  const [
+    users,
+    contacts,
+    planRequests,
+    resumesThisMonth,
+    totalScreenings,
+    topSkillsAggregation,
+    usersTimeSeries,
+    resumesTimeSeries,
+    screeningsTimeSeries
+  ] = await Promise.all([
     User.find().sort({ createdAt: -1 }).select('-__v'),
     Contact.find().sort({ createdAt: -1 }).limit(50),
     PlanRequest.find().sort({ createdAt: -1 }).limit(50),
@@ -52,16 +62,16 @@ exports.getDashboard = asyncHandler(async (_req, res) => {
   }).length;
 
   const timeSeriesData = [];
-  for (let i = 0; i <= 30; i++) {
-    const d = new Date(thirtyDaysAgo);
-    d.setDate(d.getDate() + i);
-    const dateStr = d.toISOString().split('T')[0];
+  for (let offsetDays = 0; offsetDays <= 30; offsetDays++) {
+    const currentDate = new Date(thirtyDaysAgo);
+    currentDate.setDate(currentDate.getDate() + offsetDays);
+    const dateStr = currentDate.toISOString().split('T')[0];
     
     timeSeriesData.push({
       date: dateStr,
-      users: usersTs.find(x => x._id === dateStr)?.count || 0,
-      resumes: resumesTs.find(x => x._id === dateStr)?.count || 0,
-      screenings: screeningsTs.find(x => x._id === dateStr)?.count || 0,
+      users: usersTimeSeries.find(series => series._id === dateStr)?.count || 0,
+      resumes: resumesTimeSeries.find(series => series._id === dateStr)?.count || 0,
+      screenings: screeningsTimeSeries.find(series => series._id === dateStr)?.count || 0,
     });
   }
 
@@ -70,16 +80,16 @@ exports.getDashboard = asyncHandler(async (_req, res) => {
       users: users.length,
       activeUsers,
       resumesThisMonth,
-      screeningsCount,
+      screeningsCount: totalScreenings,
       contacts: contacts.length,
-      pendingRequests: requests.filter((r) => r.status === 'pending').length,
+      pendingRequests: planRequests.filter((req) => req.status === 'pending').length,
     },
     planCounts,
-    topSkills: topSkillsAgg.map(s => ({ skill: s._id, count: s.count })),
+    topSkills: topSkillsAggregation.map(skillGroup => ({ skill: skillGroup._id, count: skillGroup.count })),
     timeSeriesData,
     users,
     contacts,
-    requests,
+    requests: planRequests,
   });
 });
 

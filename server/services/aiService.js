@@ -9,6 +9,22 @@ class AIService {
     });
   }
 
+  /**
+   * Helper to ensure score is an integer between 0 and 100
+   */
+  static normalizeScore(score) {
+    if (score === undefined || score === null) return 0;
+    
+    let normalized = score;
+    // Guard against AI returning decimal (0-1) instead of integer (0-100)
+    if (normalized > 0 && normalized <= 1) {
+      normalized = Math.round(normalized * 100);
+    } else {
+      normalized = Math.min(100, Math.max(0, Math.round(normalized)));
+    }
+    return normalized;
+  }
+
   static async extractText(buffer) {
     try {
       const parse = typeof pdfParse === 'function' ? pdfParse : (pdfParse.PDFParse || pdfParse.default);
@@ -115,22 +131,11 @@ ${jobDescription}`;
 
       const parsed = JSON.parse(content);
 
-      // Normalize score: guard against AI returning decimal (0-1) instead of integer (0-100)
-      if (parsed.score !== undefined) {
-        if (parsed.score > 0 && parsed.score <= 1) {
-          parsed.score = Math.round(parsed.score * 100);
-        } else {
-          parsed.score = Math.min(100, Math.max(0, Math.round(parsed.score)));
-        }
-      }
-
-      // Normalize formatting score
-      if (parsed.formatting?.score !== undefined) {
-        if (parsed.formatting.score > 0 && parsed.formatting.score <= 1) {
-          parsed.formatting.score = Math.round(parsed.formatting.score * 100);
-        } else {
-          parsed.formatting.score = Math.min(100, Math.max(0, Math.round(parsed.formatting.score)));
-        }
+      // Normalize scores to be strictly 0-100 integers
+      parsed.score = AIService.normalizeScore(parsed.score);
+      
+      if (parsed.formatting) {
+        parsed.formatting.score = AIService.normalizeScore(parsed.formatting.score);
       }
 
       console.log('Analysis complete. Score:', parsed.score);

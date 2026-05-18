@@ -21,8 +21,11 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        await syncUserWithBackend(currentUser);
-        await fetchProfile(currentUser);
+        // Run backend sync and profile fetch concurrently without blocking the initial render
+        Promise.all([
+          syncUserWithBackend(currentUser),
+          fetchProfile(currentUser)
+        ]).catch(console.error);
       } else {
         setProfile(null);
       }
