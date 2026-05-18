@@ -11,10 +11,13 @@ export default function Success() {
   const { user } = useAuth();
   const [status, setStatus] = useState('processing'); // processing, success, error
 
+  const [errorMessage, setErrorMessage] = useState('No payment session ID was found.');
+
   useEffect(() => {
     const verifySession = async () => {
       if (!sessionId) {
         setStatus('error');
+        setErrorMessage('No payment session ID was found in the URL.');
         return;
       }
       try {
@@ -26,15 +29,24 @@ export default function Success() {
           },
           body: JSON.stringify({ sessionId })
         });
-        const data = await res.json();
-        if (data.success) {
+        
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error('Server returned an invalid response (might be down or crashing).');
+        }
+
+        if (res.ok && data.success) {
           setStatus('success');
         } else {
           setStatus('error');
+          setErrorMessage(data.error || data.message || 'Payment verification failed on the server.');
         }
       } catch (err) {
         console.error('Failed to verify session:', err);
         setStatus('error');
+        setErrorMessage(err.message || 'Network error occurred during verification.');
       }
     };
 
@@ -80,7 +92,7 @@ export default function Success() {
         {status === 'error' && (
           <div className="flex flex-col items-center">
             <h2 className="text-2xl font-bold text-red-400">Invalid Session</h2>
-            <p className="text-slate-400 mt-2">No payment session ID was found.</p>
+            <p className="text-slate-400 mt-2">{errorMessage}</p>
             <button onClick={() => navigate('/')} className="mt-6 px-6 py-3 btn-pill-secondary">
               Return Home
             </button>
