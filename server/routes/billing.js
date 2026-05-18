@@ -89,6 +89,10 @@ router.post('/verify-session', authMiddleware, asyncHandler(async (req, res) => 
       'plan.expiresAt': new Date(subscription.current_period_end * 1000)
     }, { new: true });
 
+    if (!user) {
+      throw new ApiError(404, 'User not found in database. Please log out and log back in.');
+    }
+
     return res.json({ success: true, plan: user.plan });
   }
 
