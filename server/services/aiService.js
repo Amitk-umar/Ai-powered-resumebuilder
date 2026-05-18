@@ -2,14 +2,13 @@ const OpenAI = require('openai');
 
 /**
  * AI Service
- * Primary  : NVIDIA NIM — z-ai/glm-5.1 via direct fetch()
- *            (uses streaming + thinking mode exactly as the official sample)
- * Fallback : OpenRouter — google/gemini-2.0-flash-exp:free
- *            (free tier, OpenAI-compatible, already have the key)
+ * Primary   : NVIDIA NIM — z-ai/glm-5.1 (native fetch, no SDK param stripping)
+ * Fallback 1: OpenRouter — deepseek/deepseek-v4-flash:free  (great at JSON)
+ * Fallback 2: OpenRouter — meta-llama/llama-3.3-70b-instruct:free
  */
 class AIService {
   constructor() {
-    // Fallback via OpenRouter (OpenAI-compatible)
+    // OpenRouter client (OpenAI-compatible)
     this.openrouterClient = new OpenAI({
       apiKey: process.env.OPENROUTER_API_KEY || 'missing-openrouter-key',
       baseURL: 'https://openrouter.ai/api/v1',
@@ -19,7 +18,7 @@ class AIService {
       console.warn('[AIService] WARNING: NVIDIA_API_KEY not set.');
     }
     if (!process.env.OPENROUTER_API_KEY) {
-      console.warn('[AIService] WARNING: OPENROUTER_API_KEY not set — fallback unavailable.');
+      console.warn('[AIService] WARNING: OPENROUTER_API_KEY not set — fallbacks unavailable.');
     }
   }
 
@@ -36,9 +35,11 @@ class AIService {
 
   static cleanJSON(raw) {
     let s = (raw || '').trim();
+    // Strip markdown fences
     if (s.startsWith('```')) {
       s = s.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
     }
+    // Extract first valid JSON object
     const m = s.match(/\{[\s\S]*\}/);
     return m ? m[0] : s;
   }
@@ -112,15 +113,14 @@ ${jobDescription}`;
 
   // ─────────────────────────────────────────────────────────
   // PRIMARY: GLM-5.1 via NVIDIA NIM
-  // Uses native fetch() so chat_template_kwargs is NOT stripped.
-  // This matches the official NVIDIA sample code exactly.
+  // Uses native fetch() — no OpenAI SDK stripping of custom params.
+  // Streaming + thinking mode, exactly as the official NVIDIA sample.
   // ─────────────────────────────────────────────────────────
 
   async _analyzeWithGLM(resumeText, jobDescription) {
-    console.log('[AIService] Calling GLM-5.1 via NVIDIA NIM (native fetch, streaming)...');
+    console.log('[AIService] PRIMARY: Calling GLM-5.1 via NVIDIA NIM...');
 
     const controller = new AbortController();
-    // 120 s — thinking mode needs extra time
     const timer = setTimeout(() => controller.abort(), 120_000);
 
     let response;
@@ -141,7 +141,7 @@ ${jobDescription}`;
           temperature: 1,
           top_p: 1,
           max_tokens: 16384,
-          // chat_template_kwargs sent directly — no SDK stripping
+          // Passed directly in body — not through OpenAI SDK so it is NOT stripped
           chat_template_kwargs: { enable_thinking: true, clear_thinking: true },
           stream: true,
         }),
@@ -157,11 +157,11 @@ ${jobDescription}`;
 
     if (!response.ok) {
       const errText = await response.text().catch(() => '');
-      console.error('[AIService] NVIDIA API HTTP error:', response.status, errText.slice(0, 300));
-      throw new Error(`NVIDIA API returned ${response.status}: ${errText.slice(0, 200)}`);
+      console.error('[AIService] NVIDIA error:', response.status, errText.slice(0, 300));
+      throw new Error(`NVIDIA API ${response.status}: ${errText.slice(0, 200)}`);
     }
 
-    // Parse SSE stream — collect only content tokens (not reasoning_content)
+    // Parse SSE stream — accumulate only content tokens (not reasoning_content)
     const rawBody = await response.text();
     let content = '';
     for (const line of rawBody.split('\n')) {
@@ -172,23 +172,21 @@ ${jobDescription}`;
       try {
         const chunk = JSON.parse(data);
         content += chunk.choices?.[0]?.delta?.content || '';
-      } catch {
-        // skip malformed lines
-      }
+      } catch { /* skip malformed SSE lines */ }
     }
 
-    console.log('[AIService] GLM-5.1 stream complete. Content length:', content.length);
+    console.log('[AIService] GLM-5.1 complete. Content length:', content.length);
     if (!content.trim()) throw new Error('GLM-5.1 returned empty content');
     return content;
   }
 
   // ─────────────────────────────────────────────────────────
-  // FALLBACK: OpenRouter — free Gemini model
-  // (OpenAI-compatible, uses the OPENROUTER_API_KEY already in .env)
+  // FALLBACK 1: OpenRouter — DeepSeek V4 Flash (free)
+  // Confirmed free on OpenRouter. Excellent at structured JSON output.
   // ─────────────────────────────────────────────────────────
 
-  async _analyzeWithOpenRouter(resumeText, jobDescription) {
-    console.log('[AIService] Using OpenRouter fallback (gemini-2.0-flash-exp:free)...');
+  async _analyzeWithOpenRouter(model, resumeText, jobDescription) {
+    console.log(`[AIService] OpenRouter fallback: ${model}...`);
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 90_000);
@@ -196,7 +194,7 @@ ${jobDescription}`;
     try {
       const completion = await this.openrouterClient.chat.completions.create(
         {
-          model: 'google/gemini-2.0-flash-exp:free',
+          model,
           messages: [
             { role: 'system', content: AIService.buildSystemPrompt() },
             { role: 'user',   content: AIService.buildUserPrompt(resumeText, jobDescription) },
@@ -209,13 +207,14 @@ ${jobDescription}`;
       clearTimeout(timer);
 
       const text = completion.choices?.[0]?.message?.content || '';
-      console.log('[AIService] OpenRouter response length:', text.length);
+      console.log(`[AIService] OpenRouter (${model}) response length:`, text.length);
+      if (!text.trim()) throw new Error(`${model} returned empty content`);
       return text;
 
     } catch (err) {
       clearTimeout(timer);
       if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
-        throw new Error('OpenRouter timed out after 90 s');
+        throw new Error(`OpenRouter ${model} timed out after 90 s`);
       }
       throw err;
     }
@@ -228,22 +227,35 @@ ${jobDescription}`;
   async analyzeResumeVsJD(resumeText, jobDescription) {
     let raw = '';
 
-    // Try GLM-5.1 first
+    // 1. Try GLM-5.1 (NVIDIA NIM)
     try {
       raw = await this._analyzeWithGLM(resumeText, jobDescription);
     } catch (glmErr) {
-      console.warn('[AIService] GLM-5.1 failed:', glmErr.message, '→ trying OpenRouter fallback...');
+      console.warn('[AIService] GLM-5.1 failed:', glmErr.message);
+
+      // 2. Try DeepSeek V4 Flash (free on OpenRouter)
       try {
-        raw = await this._analyzeWithOpenRouter(resumeText, jobDescription);
-      } catch (orErr) {
-        console.error('[AIService] Both providers failed.', orErr.message);
-        throw new Error(
-          'AI analysis failed on all providers. Please try again later. (' + orErr.message + ')'
+        raw = await this._analyzeWithOpenRouter(
+          'deepseek/deepseek-v4-flash:free', resumeText, jobDescription
         );
+      } catch (fb1Err) {
+        console.warn('[AIService] DeepSeek V4 Flash failed:', fb1Err.message);
+
+        // 3. Try Llama 3.3 70B (free on OpenRouter)
+        try {
+          raw = await this._analyzeWithOpenRouter(
+            'meta-llama/llama-3.3-70b-instruct:free', resumeText, jobDescription
+          );
+        } catch (fb2Err) {
+          console.error('[AIService] All providers failed:', fb2Err.message);
+          throw new Error(
+            'AI analysis failed on all providers. Please try again later. (' + fb2Err.message + ')'
+          );
+        }
       }
     }
 
-    // Parse + normalize
+    // Parse + normalize scores
     try {
       const cleaned = AIService.cleanJSON(raw);
       const parsed = JSON.parse(cleaned);
@@ -260,13 +272,13 @@ ${jobDescription}`;
   }
 
   // ─────────────────────────────────────────────────────────
-  // Public: rewriteText  (Pro/Premium)
+  // Public: rewriteText  (Pro/Premium bullet rewriter)
   // ─────────────────────────────────────────────────────────
 
   async rewriteText(text, tone = 'professional') {
     const systemPrompt = `You are an expert resume writer. Rewrite the bullet point to be more impactful.
 TONE: ${tone}
-RULES: Start with action verb. Quantify if possible. 1-2 sentences max. No fabricated numbers. Return ONLY the rewritten text.`;
+RULES: Start with a strong action verb. Quantify if possible. 1-2 sentences max. No fabricated numbers. Return ONLY the rewritten text — no explanation.`;
 
     // Try GLM-5.1
     try {
@@ -314,14 +326,14 @@ RULES: Start with action verb. Quantify if possible. 1-2 sentences max. No fabri
       console.warn('[AIService] GLM-5.1 rewrite failed:', glmErr.message);
     }
 
-    // OpenRouter fallback
-    console.log('[AIService] Rewrite — using OpenRouter fallback...');
+    // OpenRouter fallback for rewrite
+    console.log('[AIService] Rewrite — using OpenRouter DeepSeek fallback...');
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 30_000);
       const completion = await this.openrouterClient.chat.completions.create(
         {
-          model: 'google/gemini-2.0-flash-exp:free',
+          model: 'deepseek/deepseek-v4-flash:free',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user',   content: text },
