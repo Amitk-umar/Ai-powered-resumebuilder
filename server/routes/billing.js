@@ -60,43 +60,49 @@ router.post('/checkout-session', authMiddleware, asyncHandler(async (req, res) =
 
 // Verify Checkout Session (Manually updates DB to prevent relying solely on webhooks)
 router.post('/verify-session', authMiddleware, asyncHandler(async (req, res) => {
-  const { sessionId } = req.body;
-  if (!sessionId) {
-    throw new ApiError(400, 'Session ID is required');
-  }
-
-  const session = await stripe.checkout.sessions.retrieve(sessionId);
-  if (session.payment_status !== 'paid') {
-    throw new ApiError(400, 'Payment not successful');
-  }
-
-  const userId = session.client_reference_id || session.metadata?.userId;
-  const subscriptionId = session.subscription;
-  const customerId = session.customer;
-
-  if (userId) {
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    const priceId = subscription.items.data[0].price.id;
-    const planKey = getPlanKeyByPriceId(priceId);
-
-    const user = await User.findByIdAndUpdate(userId, {
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscriptionId,
-      stripePriceId: priceId,
-      'plan.name': planKey,
-      'plan.status': subscription.status,
-      'plan.startedAt': new Date(subscription.current_period_start * 1000),
-      'plan.expiresAt': new Date(subscription.current_period_end * 1000)
-    }, { new: true });
-
-    if (!user) {
-      throw new ApiError(404, 'User not found in database. Please log out and log back in.');
+  try {
+    const { sessionId } = req.body;
+    if (!sessionId) {
+      throw new ApiError(400, 'Session ID is required');
     }
 
-    return res.json({ success: true, plan: user.plan });
-  }
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status !== 'paid') {
+      throw new ApiError(400, 'Payment not successful');
+    }
 
-  res.json({ success: false, message: 'User not identified in session' });
+    const userId = session.client_reference_id || session.metadata?.userId;
+    const subscriptionId = session.subscription;
+    const customerId = session.customer;
+
+    if (userId) {
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const priceId = subscription.items.data[0].price.id;
+      const planKey = getPlanKeyByPriceId(priceId);
+
+      const user = await User.findByIdAndUpdate(userId, {
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: subscriptionId,
+        stripePriceId: priceId,
+        'plan.name': planKey,
+        'plan.status': subscription.status,
+        'plan.startedAt': new Date(subscription.current_period_start * 1000),
+        'plan.expiresAt': new Date(subscription.current_period_end * 1000)
+      }, { new: true });
+
+      if (!user) {
+        throw new ApiError(404, 'User not found in database. Please log out and log back in.');
+      }
+
+      return res.json({ success: true, plan: user.plan });
+    }
+
+    res.json({ success: false, message: 'User not identified in session' });
+  } catch (err) {
+    console.error('Detailed verify-session error:', err);
+    // Return the actual error message so the frontend can display it instead of "Internal server error"
+    throw new ApiError(500, `Verification Failed: ${err.message}`);
+  }
 }));
 
 // Customer Portal
@@ -124,11 +130,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   let event;
 
   try {
-    // If you have a webhook secret configured, uncomment and use it
-    // const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    // event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-    
-    // For now, in test mode without webhook secret, just parse body:
+    // For now, in test mode without webhook secret, just parsing body:
     event = JSON.parse(req.body);
   } catch (err) {
     console.error(`Webhook Error: ${err.message}`);
