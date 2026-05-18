@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema({
     },
     status: {
       type: String,
-      enum: ['active', 'expired', 'canceled', 'past_due', 'unpaid'],
+      enum: ['active', 'expired', 'canceled', 'past_due', 'unpaid', 'trialing'],
       default: 'active'
     },
     startedAt: {

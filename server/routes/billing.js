@@ -15,6 +15,14 @@ const getPlanKeyByPriceId = (priceId) => {
   return 'basic';
 };
 
+// Safely convert a Stripe Unix timestamp (seconds) to a Date.
+// Returns null instead of "Invalid Date" if the value is missing.
+const safeDate = (unixSeconds) => {
+  if (unixSeconds == null || isNaN(unixSeconds)) return null;
+  const d = new Date(unixSeconds * 1000);
+  return isNaN(d.getTime()) ? null : d;
+};
+
 // Create Checkout Session
 router.post('/checkout-session', authMiddleware, asyncHandler(async (req, res) => {
   const { planKey } = req.body;
@@ -80,15 +88,26 @@ router.post('/verify-session', authMiddleware, asyncHandler(async (req, res) => 
       const priceId = subscription.items.data[0].price.id;
       const planKey = getPlanKeyByPriceId(priceId);
 
-      const user = await User.findByIdAndUpdate(userId, {
+      // Normalise plan.status — Stripe may return 'trialing' which the enum must accept
+      const planStatus = ['active', 'expired', 'canceled', 'past_due', 'unpaid', 'trialing'].includes(subscription.status)
+        ? subscription.status
+        : 'active';
+
+      const updateData = {
         stripeCustomerId: customerId,
         stripeSubscriptionId: subscriptionId,
         stripePriceId: priceId,
         'plan.name': planKey,
-        'plan.status': subscription.status,
-        'plan.startedAt': new Date(subscription.current_period_start * 1000),
-        'plan.expiresAt': new Date(subscription.current_period_end * 1000)
-      }, { new: true });
+        'plan.status': planStatus,
+      };
+
+      // Only set date fields if Stripe returned valid timestamps
+      const startedAt = safeDate(subscription.current_period_start);
+      const expiresAt = safeDate(subscription.current_period_end);
+      if (startedAt) updateData['plan.startedAt'] = startedAt;
+      if (expiresAt) updateData['plan.expiresAt'] = expiresAt;
+
+      const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
 
       if (!user) {
         throw new ApiError(404, 'User not found in database. Please log out and log back in.');
@@ -150,15 +169,24 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           const priceId = subscription.items.data[0].price.id;
           const planKey = getPlanKeyByPriceId(priceId);
 
-          await User.findByIdAndUpdate(userId, {
+          const planStatus = ['active', 'expired', 'canceled', 'past_due', 'unpaid', 'trialing'].includes(subscription.status)
+            ? subscription.status
+            : 'active';
+
+          const webhookUpdateData = {
             stripeCustomerId: customerId,
             stripeSubscriptionId: subscriptionId,
             stripePriceId: priceId,
             'plan.name': planKey,
-            'plan.status': subscription.status,
-            'plan.startedAt': new Date(subscription.current_period_start * 1000),
-            'plan.expiresAt': new Date(subscription.current_period_end * 1000)
-          });
+            'plan.status': planStatus,
+          };
+
+          const whStartedAt = safeDate(subscription.current_period_start);
+          const whExpiresAt = safeDate(subscription.current_period_end);
+          if (whStartedAt) webhookUpdateData['plan.startedAt'] = whStartedAt;
+          if (whExpiresAt) webhookUpdateData['plan.expiresAt'] = whExpiresAt;
+
+          await User.findByIdAndUpdate(userId, webhookUpdateData);
         }
         break;
       }
@@ -174,12 +202,21 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         // Find user by customerId
         const user = await User.findOne({ stripeCustomerId: customerId });
         if (user) {
+          const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+          const validStatus = ['active', 'expired', 'canceled', 'past_due', 'unpaid', 'trialing'].includes(subscription.status)
+            ? subscription.status
+            : 'active';
+
           user.stripeSubscriptionId = subscription.id;
           user.stripePriceId = priceId;
-          user.plan.name = subscription.status === 'active' || subscription.status === 'trialing' ? planKey : 'basic';
-          user.plan.status = subscription.status;
-          user.plan.startedAt = new Date(subscription.current_period_start * 1000);
-          user.plan.expiresAt = new Date(subscription.current_period_end * 1000);
+          user.plan.name = isActive ? planKey : 'basic';
+          user.plan.status = validStatus;
+
+          const subStartedAt = safeDate(subscription.current_period_start);
+          const subExpiresAt = safeDate(subscription.current_period_end);
+          if (subStartedAt) user.plan.startedAt = subStartedAt;
+          if (subExpiresAt) user.plan.expiresAt = subExpiresAt;
+
           await user.save();
         }
         break;
