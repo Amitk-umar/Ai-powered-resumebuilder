@@ -30,14 +30,19 @@ class AIService {
   }
 
   static cleanJSON(raw) {
-    let s = (raw || '').trim();
-    // Strip markdown fences
-    if (s.startsWith('```')) {
-      s = s.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+    if (!raw) return '{}';
+    
+    // Find the first '{' and the last '}' in the entire string
+    const firstBrace = raw.indexOf('{');
+    const lastBrace = raw.lastIndexOf('}');
+    
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      // Extract exactly the JSON object, ignoring all markdown, <think> tags, or conversational text
+      return raw.substring(firstBrace, lastBrace + 1);
     }
-    // Extract first valid JSON object
-    const m = s.match(/\{[\s\S]*\}/);
-    return m ? m[0] : s;
+    
+    // If no braces found, return as is (will likely fail JSON.parse, but nothing else we can do)
+    return raw;
   }
 
   // ─────────────────────────────────────────────────────────
