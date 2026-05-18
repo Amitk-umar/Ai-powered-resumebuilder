@@ -492,15 +492,15 @@ export default function ResumeScreener() {
 
             {/* ── Formatting Analysis ─── */}
             {results.formatting && (
-              <div className="formatting-panel result-animate delay-4">
-                <div className="formatting-panel-header">
-                  <div className="f-icon"><HiClipboardCheck /></div>
-                  <span className="f-title">ATS Formatting Score</span>
-                  <span className={`f-score-badge ${getScoreColor(results.formatting.score)}`}>
+              <div className="result-section result-animate delay-4">
+                <div className="section-header">
+                  <div className="section-icon"><HiClipboardCheck /></div>
+                  <h3>ATS Formatting Score</h3>
+                  <span className={`badge-pill ${getScoreColor(results.formatting.score)}`}>
                     {results.formatting.score}%
                   </span>
                 </div>
-                <div className="formatting-body">
+                <div className="section-content">
                   <div className="formatting-progress-wrap">
                     <div className="formatting-progress-bar">
                       <div
