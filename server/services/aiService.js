@@ -1,36 +1,66 @@
+const OpenAI = require('openai');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
+/**
+ * AI Service — Primary: NVIDIA NIM (z-ai/glm-5.1)
+ *                Fallback: Google Gemini 1.5 Flash
+ *
+ * GLM-5.1 is used first because it gives richer, more structured analysis.
+ * If NVIDIA NIM is unavailable or times out, Gemini kicks in automatically
+ * so the feature never hangs for the user.
+ */
 class AIService {
   constructor() {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      console.warn('[AIService] WARNING: GEMINI_API_KEY is not set. AI features will fail.');
+    // ── Primary: NVIDIA NIM / GLM-5.1 ──────────────────────
+    this.nvidiaClient = new OpenAI({
+      apiKey: process.env.NVIDIA_API_KEY || 'missing-nvidia-key',
+      baseURL: 'https://integrate.api.nvidia.com/v1',
+    });
+
+    // ── Fallback: Google Gemini ─────────────────────────────
+    this.genAI = new GoogleGenerativeAI(
+      process.env.GEMINI_API_KEY || 'missing-gemini-key'
+    );
+    this.geminiModel = this.genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+    });
+
+    if (!process.env.NVIDIA_API_KEY) {
+      console.warn('[AIService] WARNING: NVIDIA_API_KEY not set — will use Gemini fallback.');
     }
-    this.genAI = new GoogleGenerativeAI(apiKey || 'missing-key');
-    // gemini-1.5-flash: fast, generous free quota, great at structured JSON output
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    if (!process.env.GEMINI_API_KEY) {
+      console.warn('[AIService] WARNING: GEMINI_API_KEY not set — Gemini fallback unavailable.');
+    }
   }
 
-  /**
-   * Helper to ensure score is an integer between 0 and 100
-   */
+  // ─────────────────────────────────────────────────────────
+  // Utility
+  // ─────────────────────────────────────────────────────────
+
+  /** Ensure score is a clean integer 0-100 */
   static normalizeScore(score) {
-    if (score === undefined || score === null) return 0;
-    let normalized = score;
-    // Guard against AI returning decimal (0-1) instead of integer (0-100)
-    if (normalized > 0 && normalized <= 1) {
-      normalized = Math.round(normalized * 100);
-    } else {
-      normalized = Math.min(100, Math.max(0, Math.round(normalized)));
-    }
-    return normalized;
+    if (score == null) return 0;
+    let v = score;
+    if (v > 0 && v <= 1) v = Math.round(v * 100);
+    return Math.min(100, Math.max(0, Math.round(v)));
   }
 
-  /**
-   * Analyze a resume against a job description and return a structured JSON report.
-   */
-  async analyzeResumeVsJD(resumeText, jobDescription) {
-    const prompt = `You are a professional ATS (Applicant Tracking System) resume analyzer and career coach.
+  /** Strip markdown code-fences and extract the first JSON object */
+  static cleanJSON(raw) {
+    let s = (raw || '').trim();
+    if (s.startsWith('```')) {
+      s = s.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+    }
+    const m = s.match(/\{[\s\S]*\}/);
+    return m ? m[0] : s;
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Shared prompt builders
+  // ─────────────────────────────────────────────────────────
+
+  static buildScreeningSystemPrompt() {
+    return `You are a professional ATS (Applicant Tracking System) resume analyzer and career coach.
 
 SCORING INSTRUCTIONS — follow exactly:
 Calculate "score" as an INTEGER from 0 to 100 based on these weighted criteria:
@@ -79,53 +109,130 @@ The JSON must match this exact schema:
     "score": <integer 0-100>,
     "issues": [<formatting issue or tip strings>]
   }
-}
+}`;
+  }
+
+  static buildScreeningUserPrompt(resumeText, jobDescription) {
+    return `Analyze this resume against the job description below. Return a raw JSON object only — no markdown, no code fences.
 
 ===RESUME===
 ${resumeText}
 
 ===JOB DESCRIPTION===
 ${jobDescription}`;
+  }
 
-    console.log('[AIService] Starting Gemini analysis...');
+  // ─────────────────────────────────────────────────────────
+  // GLM-5.1 via NVIDIA NIM  (primary)
+  // ─────────────────────────────────────────────────────────
+
+  async _analyzeWithGLM(resumeText, jobDescription) {
+    console.log('[AIService] Trying GLM-5.1 via NVIDIA NIM...');
+
+    // AbortController gives us a hard timeout on the HTTP request
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      controller.abort();
+    }, 90_000); // 90 seconds — GLM-5.1 can be slower on long resumes
 
     try {
-      // Add a 60-second timeout so the request never hangs forever
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      const completion = await this.nvidiaClient.chat.completions.create(
+        {
+          model: 'z-ai/glm-5.1',
+          messages: [
+            {
+              role: 'system',
+              content: AIService.buildScreeningSystemPrompt(),
+            },
+            {
+              role: 'user',
+              content: AIService.buildScreeningUserPrompt(resumeText, jobDescription),
+            },
+          ],
+          temperature: 0.3,
+          top_p: 0.9,
+          max_tokens: 4096,
+          stream: false,
+        },
+        { signal: controller.signal }
+      );
 
-      let content;
+      clearTimeout(timer);
+
+      const raw = completion.choices[0]?.message?.content || '';
+      console.log('[AIService] GLM-5.1 response length:', raw.length);
+      return raw;
+    } catch (err) {
+      clearTimeout(timer);
+      if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
+        throw new Error('GLM-5.1 request timed out after 90 s');
+      }
+      throw err;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Gemini 1.5 Flash  (fallback)
+  // ─────────────────────────────────────────────────────────
+
+  async _analyzeWithGemini(resumeText, jobDescription) {
+    console.log('[AIService] Using Gemini 1.5 Flash as fallback...');
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60_000);
+
+    try {
+      const fullPrompt =
+        AIService.buildScreeningSystemPrompt() +
+        '\n\n' +
+        AIService.buildScreeningUserPrompt(resumeText, jobDescription);
+
+      const result = await this.geminiModel.generateContent(fullPrompt, {
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+
+      const raw = result.response.text();
+      console.log('[AIService] Gemini response length:', raw?.length);
+      return raw;
+    } catch (err) {
+      clearTimeout(timer);
+      if (err.name === 'AbortError') {
+        throw new Error('Gemini request timed out after 60 s');
+      }
+      throw err;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Public: analyzeResumeVsJD
+  // ─────────────────────────────────────────────────────────
+
+  async analyzeResumeVsJD(resumeText, jobDescription) {
+    let raw = '';
+
+    // Try GLM-5.1 first; fall back to Gemini on any error
+    try {
+      raw = await this._analyzeWithGLM(resumeText, jobDescription);
+    } catch (glmErr) {
+      console.warn('[AIService] GLM-5.1 failed:', glmErr.message, '— switching to Gemini fallback.');
       try {
-        const result = await this.model.generateContent(prompt, {
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-        content = result.response.text();
-      } catch (fetchErr) {
-        clearTimeout(timeoutId);
-        if (fetchErr.name === 'AbortError') {
-          throw new Error('AI request timed out after 60 seconds. Please try again.');
-        }
-        throw fetchErr;
+        raw = await this._analyzeWithGemini(resumeText, jobDescription);
+      } catch (geminiErr) {
+        console.error('[AIService] Both providers failed.', geminiErr.message);
+        throw new Error(
+          'AI analysis failed on all providers. Please try again later. (' +
+            geminiErr.message +
+            ')'
+        );
       }
+    }
 
-      console.log('[AIService] Gemini raw response length:', content?.length);
+    // Parse and normalize
+    try {
+      const cleaned = AIService.cleanJSON(raw);
+      const parsed = JSON.parse(cleaned);
 
-      // Strip any markdown code fences the model might add despite instructions
-      content = (content || '').trim();
-      if (content.startsWith('```')) {
-        content = content.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
-      }
-
-      // Extract JSON object if there's surrounding text
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        content = jsonMatch[0];
-      }
-
-      const parsed = JSON.parse(content);
-
-      // Normalize scores to be strictly 0-100 integers
       parsed.score = AIService.normalizeScore(parsed.score);
       if (parsed.formatting) {
         parsed.formatting.score = AIService.normalizeScore(parsed.formatting.score);
@@ -133,56 +240,66 @@ ${jobDescription}`;
 
       console.log('[AIService] Analysis complete. Score:', parsed.score);
       return parsed;
-
-    } catch (error) {
-      console.error('[AIService] Error:', error?.message || error);
-      throw new Error('Failed to analyze resume with AI: ' + (error?.message || String(error)));
+    } catch (parseErr) {
+      console.error('[AIService] JSON parse failed. Raw response:', raw?.slice(0, 500));
+      throw new Error('AI returned an invalid response format. Please try again.');
     }
   }
 
-  /**
-   * Rewrite a resume bullet point to be more impactful.
-   */
+  // ─────────────────────────────────────────────────────────
+  // Public: rewriteText  (Pro/Premium feature)
+  // ─────────────────────────────────────────────────────────
+
   async rewriteText(text, tone = 'professional') {
-    const prompt = `You are an expert resume writer. Rewrite the following resume bullet point to be more impactful, professional, and results-oriented.
-
+    const systemPrompt = `You are an expert resume writer. Rewrite the provided bullet point to be more impactful, professional, and results-oriented.
 TONE: ${tone}
-
 RULES:
 1. Start with a strong action verb.
-2. Quantify results where possible (if the original implies metrics, emphasize them).
-3. Keep it concise (1-2 sentences maximum).
-4. Do not add made-up numbers if none exist or aren't implied.
-5. Return ONLY the rewritten text — no explanations, no quotes, no formatting.
+2. Quantify results where possible.
+3. Keep it concise (1-2 sentences max).
+4. Do not fabricate numbers.
+5. Return ONLY the rewritten text — no explanations, no quotes, no formatting.`;
 
-ORIGINAL TEXT:
-${text}`;
-
-    console.log('[AIService] Starting Gemini rewrite...');
-
+    // Try GLM-5.1 first
     try {
+      console.log('[AIService] Rewrite — trying GLM-5.1...');
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const timer = setTimeout(() => controller.abort(), 30_000);
 
-      let content;
-      try {
-        const result = await this.model.generateContent(prompt, {
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-        content = result.response.text();
-      } catch (fetchErr) {
-        clearTimeout(timeoutId);
-        if (fetchErr.name === 'AbortError') {
-          throw new Error('Rewrite request timed out. Please try again.');
-        }
-        throw fetchErr;
-      }
+      const completion = await this.nvidiaClient.chat.completions.create(
+        {
+          model: 'z-ai/glm-5.1',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: text },
+          ],
+          temperature: 0.5,
+          max_tokens: 200,
+          stream: false,
+        },
+        { signal: controller.signal }
+      );
+      clearTimeout(timer);
+      return (completion.choices[0]?.message?.content || '').trim();
+    } catch (glmErr) {
+      console.warn('[AIService] GLM-5.1 rewrite failed:', glmErr.message, '— switching to Gemini.');
+    }
 
-      return (content || '').trim();
-    } catch (error) {
-      console.error('[AIService] Rewrite Error:', error?.message || error);
-      throw new Error('Failed to rewrite text: ' + (error?.message || String(error)));
+    // Gemini fallback for rewrite
+    try {
+      console.log('[AIService] Rewrite — using Gemini fallback...');
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 30_000);
+
+      const fullPrompt = `${systemPrompt}\n\nORIGINAL TEXT:\n${text}`;
+      const result = await this.geminiModel.generateContent(fullPrompt, {
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      return (result.response.text() || '').trim();
+    } catch (geminiErr) {
+      console.error('[AIService] Both rewrite providers failed:', geminiErr.message);
+      throw new Error('Failed to rewrite text: ' + geminiErr.message);
     }
   }
 }
