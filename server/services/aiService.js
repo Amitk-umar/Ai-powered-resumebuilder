@@ -1,28 +1,25 @@
 const OpenAI = require('openai');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 /**
  * AI Service
- * Primary  : NVIDIA NIM — z-ai/glm-5.1  (streaming + thinking mode)
- * Fallback : Google Gemini 2.0 Flash
+ * Primary  : NVIDIA NIM — z-ai/glm-5.1 via direct fetch()
+ *            (uses streaming + thinking mode exactly as the official sample)
+ * Fallback : OpenRouter — google/gemini-2.0-flash-exp:free
+ *            (free tier, OpenAI-compatible, already have the key)
  */
 class AIService {
   constructor() {
-    // ── Primary: NVIDIA NIM / GLM-5.1 ──────────────────────
-    this.nvidiaClient = new OpenAI({
-      apiKey: process.env.NVIDIA_API_KEY || 'missing-nvidia-key',
-      baseURL: 'https://integrate.api.nvidia.com/v1',
+    // Fallback via OpenRouter (OpenAI-compatible)
+    this.openrouterClient = new OpenAI({
+      apiKey: process.env.OPENROUTER_API_KEY || 'missing-openrouter-key',
+      baseURL: 'https://openrouter.ai/api/v1',
     });
-
-    // ── Fallback: Google Gemini 2.0 Flash ──────────────────
-    this.genAI = new GoogleGenerativeAI(
-      process.env.GEMINI_API_KEY || 'missing-gemini-key'
-    );
-    // gemini-2.0-flash is the current stable model (1.5-flash is deprecated in v1beta)
-    this.geminiModel = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     if (!process.env.NVIDIA_API_KEY) {
       console.warn('[AIService] WARNING: NVIDIA_API_KEY not set.');
+    }
+    if (!process.env.OPENROUTER_API_KEY) {
+      console.warn('[AIService] WARNING: OPENROUTER_API_KEY not set — fallback unavailable.');
     }
   }
 
@@ -62,7 +59,7 @@ Calculate "score" as an INTEGER from 0 to 100 based on:
 
 Score guide: 85-100=Excellent, 70-84=Good, 50-69=Moderate, 30-49=Low, 0-29=Poor.
 
-IMPORTANT: "score" MUST be an integer 0-100. Do NOT return 0.85, return 85.
+IMPORTANT: "score" MUST be an integer 0-100. Do NOT return 0.85 — return 85.
 
 Respond with ONLY a raw JSON object — no markdown, no code fences, no explanation.
 Schema:
@@ -114,21 +111,28 @@ ${jobDescription}`;
   }
 
   // ─────────────────────────────────────────────────────────
-  // GLM-5.1 via NVIDIA NIM  (PRIMARY)
-  // Uses streaming + thinking mode exactly as per official sample
-  // chat_template_kwargs passed via `body` option so OpenAI SDK doesn't strip it
+  // PRIMARY: GLM-5.1 via NVIDIA NIM
+  // Uses native fetch() so chat_template_kwargs is NOT stripped.
+  // This matches the official NVIDIA sample code exactly.
   // ─────────────────────────────────────────────────────────
 
   async _analyzeWithGLM(resumeText, jobDescription) {
-    console.log('[AIService] Calling GLM-5.1 via NVIDIA NIM (streaming + thinking)...');
+    console.log('[AIService] Calling GLM-5.1 via NVIDIA NIM (native fetch, streaming)...');
 
     const controller = new AbortController();
-    // 120 s — thinking mode takes longer but gives much better analysis
+    // 120 s — thinking mode needs extra time
     const timer = setTimeout(() => controller.abort(), 120_000);
 
+    let response;
     try {
-      const stream = await this.nvidiaClient.chat.completions.create(
-        {
+      response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
+        },
+        body: JSON.stringify({
           model: 'z-ai/glm-5.1',
           messages: [
             { role: 'system', content: AIService.buildSystemPrompt() },
@@ -137,70 +141,82 @@ ${jobDescription}`;
           temperature: 1,
           top_p: 1,
           max_tokens: 16384,
+          // chat_template_kwargs sent directly — no SDK stripping
+          chat_template_kwargs: { enable_thinking: true, clear_thinking: true },
           stream: true,
-        },
-        {
-          signal: controller.signal,
-          // IMPORTANT: chat_template_kwargs must be passed here in `body` because
-          // the OpenAI SDK strips unknown top-level params from the main object.
-          // Passing via `body` merges it directly into the HTTP request payload.
-          body: {
-            chat_template_kwargs: { enable_thinking: true, clear_thinking: true },
-          },
-        }
-      );
-
-      // Collect streamed content chunks
-      let content = '';
-      for await (const chunk of stream) {
-        content += chunk.choices[0]?.delta?.content || '';
-      }
-
+        }),
+        signal: controller.signal,
+      });
+    } catch (fetchErr) {
       clearTimeout(timer);
-      console.log('[AIService] GLM-5.1 stream complete. Content length:', content.length);
-
-      if (!content.trim()) {
-        throw new Error('GLM-5.1 returned empty content');
-      }
-      return content;
-
-    } catch (err) {
-      clearTimeout(timer);
-      if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
-        throw new Error('GLM-5.1 timed out after 120 s');
-      }
-      // Log the detailed NVIDIA error for debugging
-      console.error('[AIService] GLM-5.1 error details:', err?.status, err?.message, err?.error);
-      throw err;
+      if (fetchErr.name === 'AbortError') throw new Error('GLM-5.1 timed out after 120 s');
+      throw fetchErr;
     }
+
+    clearTimeout(timer);
+
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      console.error('[AIService] NVIDIA API HTTP error:', response.status, errText.slice(0, 300));
+      throw new Error(`NVIDIA API returned ${response.status}: ${errText.slice(0, 200)}`);
+    }
+
+    // Parse SSE stream — collect only content tokens (not reasoning_content)
+    const rawBody = await response.text();
+    let content = '';
+    for (const line of rawBody.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('data: ')) continue;
+      const data = trimmed.slice(6);
+      if (data === '[DONE]') break;
+      try {
+        const chunk = JSON.parse(data);
+        content += chunk.choices?.[0]?.delta?.content || '';
+      } catch {
+        // skip malformed lines
+      }
+    }
+
+    console.log('[AIService] GLM-5.1 stream complete. Content length:', content.length);
+    if (!content.trim()) throw new Error('GLM-5.1 returned empty content');
+    return content;
   }
 
   // ─────────────────────────────────────────────────────────
-  // Gemini 2.0 Flash  (FALLBACK)
+  // FALLBACK: OpenRouter — free Gemini model
+  // (OpenAI-compatible, uses the OPENROUTER_API_KEY already in .env)
   // ─────────────────────────────────────────────────────────
 
-  async _analyzeWithGemini(resumeText, jobDescription) {
-    console.log('[AIService] Using Gemini 2.0 Flash fallback...');
+  async _analyzeWithOpenRouter(resumeText, jobDescription) {
+    console.log('[AIService] Using OpenRouter fallback (gemini-2.0-flash-exp:free)...');
 
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 60_000);
+    const timer = setTimeout(() => controller.abort(), 90_000);
 
     try {
-      const fullPrompt =
-        AIService.buildSystemPrompt() + '\n\n' + AIService.buildUserPrompt(resumeText, jobDescription);
-
-      const result = await this.geminiModel.generateContent(fullPrompt, {
-        signal: controller.signal,
-      });
+      const completion = await this.openrouterClient.chat.completions.create(
+        {
+          model: 'google/gemini-2.0-flash-exp:free',
+          messages: [
+            { role: 'system', content: AIService.buildSystemPrompt() },
+            { role: 'user',   content: AIService.buildUserPrompt(resumeText, jobDescription) },
+          ],
+          temperature: 0.3,
+          max_tokens: 4096,
+        },
+        { signal: controller.signal }
+      );
       clearTimeout(timer);
 
-      const text = result.response.text();
-      console.log('[AIService] Gemini response length:', text?.length);
+      const text = completion.choices?.[0]?.message?.content || '';
+      console.log('[AIService] OpenRouter response length:', text.length);
       return text;
 
     } catch (err) {
       clearTimeout(timer);
-      if (err.name === 'AbortError') throw new Error('Gemini timed out after 60 s');
+      if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
+        throw new Error('OpenRouter timed out after 90 s');
+      }
       throw err;
     }
   }
@@ -216,18 +232,18 @@ ${jobDescription}`;
     try {
       raw = await this._analyzeWithGLM(resumeText, jobDescription);
     } catch (glmErr) {
-      console.warn('[AIService] GLM-5.1 failed:', glmErr.message, '→ trying Gemini fallback...');
+      console.warn('[AIService] GLM-5.1 failed:', glmErr.message, '→ trying OpenRouter fallback...');
       try {
-        raw = await this._analyzeWithGemini(resumeText, jobDescription);
-      } catch (geminiErr) {
-        console.error('[AIService] Both providers failed:', geminiErr.message);
+        raw = await this._analyzeWithOpenRouter(resumeText, jobDescription);
+      } catch (orErr) {
+        console.error('[AIService] Both providers failed.', orErr.message);
         throw new Error(
-          'AI analysis failed on all providers. Please try again later. (' + geminiErr.message + ')'
+          'AI analysis failed on all providers. Please try again later. (' + orErr.message + ')'
         );
       }
     }
 
-    // Parse & normalize
+    // Parse + normalize
     try {
       const cleaned = AIService.cleanJSON(raw);
       const parsed = JSON.parse(cleaned);
@@ -244,18 +260,13 @@ ${jobDescription}`;
   }
 
   // ─────────────────────────────────────────────────────────
-  // Public: rewriteText  (Pro/Premium — bullet rewriter)
+  // Public: rewriteText  (Pro/Premium)
   // ─────────────────────────────────────────────────────────
 
   async rewriteText(text, tone = 'professional') {
-    const systemPrompt = `You are an expert resume writer. Rewrite the following resume bullet point to be more impactful and results-oriented.
+    const systemPrompt = `You are an expert resume writer. Rewrite the bullet point to be more impactful.
 TONE: ${tone}
-RULES:
-1. Start with a strong action verb.
-2. Quantify results where possible.
-3. Keep it concise (1-2 sentences max).
-4. Do not fabricate numbers.
-5. Return ONLY the rewritten text — no explanations, no quotes.`;
+RULES: Start with action verb. Quantify if possible. 1-2 sentences max. No fabricated numbers. Return ONLY the rewritten text.`;
 
     // Try GLM-5.1
     try {
@@ -263,8 +274,14 @@ RULES:
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 45_000);
 
-      const stream = await this.nvidiaClient.chat.completions.create(
-        {
+      const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
+        },
+        body: JSON.stringify({
           model: 'z-ai/glm-5.1',
           messages: [
             { role: 'system', content: systemPrompt },
@@ -273,38 +290,52 @@ RULES:
           temperature: 1,
           top_p: 1,
           max_tokens: 512,
+          chat_template_kwargs: { enable_thinking: true, clear_thinking: true },
           stream: true,
-        },
-        {
-          signal: controller.signal,
-          body: { chat_template_kwargs: { enable_thinking: true, clear_thinking: true } },
-        }
-      );
+        }),
+        signal: controller.signal,
+      });
 
-      let content = '';
-      for await (const chunk of stream) {
-        content += chunk.choices[0]?.delta?.content || '';
-      }
       clearTimeout(timer);
-      return content.trim();
 
+      if (response.ok) {
+        const rawBody = await response.text();
+        let content = '';
+        for (const line of rawBody.split('\n')) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data: ')) continue;
+          const data = trimmed.slice(6);
+          if (data === '[DONE]') break;
+          try { content += JSON.parse(data).choices?.[0]?.delta?.content || ''; } catch {}
+        }
+        if (content.trim()) return content.trim();
+      }
     } catch (glmErr) {
-      console.warn('[AIService] GLM-5.1 rewrite failed:', glmErr.message, '→ Gemini fallback...');
+      console.warn('[AIService] GLM-5.1 rewrite failed:', glmErr.message);
     }
 
-    // Gemini fallback
+    // OpenRouter fallback
+    console.log('[AIService] Rewrite — using OpenRouter fallback...');
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 30_000);
-      const result = await this.geminiModel.generateContent(
-        `${systemPrompt}\n\nORIGINAL TEXT:\n${text}`,
+      const completion = await this.openrouterClient.chat.completions.create(
+        {
+          model: 'google/gemini-2.0-flash-exp:free',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user',   content: text },
+          ],
+          temperature: 0.5,
+          max_tokens: 200,
+        },
         { signal: controller.signal }
       );
       clearTimeout(timer);
-      return (result.response.text() || '').trim();
-    } catch (geminiErr) {
-      console.error('[AIService] Both rewrite providers failed:', geminiErr.message);
-      throw new Error('Failed to rewrite text: ' + geminiErr.message);
+      return (completion.choices?.[0]?.message?.content || '').trim();
+    } catch (orErr) {
+      console.error('[AIService] Both rewrite providers failed:', orErr.message);
+      throw new Error('Failed to rewrite text: ' + orErr.message);
     }
   }
 }
