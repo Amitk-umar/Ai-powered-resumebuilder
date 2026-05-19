@@ -1,398 +1,626 @@
-<div align="center">
+# 🎯 AI-Powered Resume Builder
 
-# ✦ NextHireAI
+## Project Introduction
 
-### _Build Smarter. Get Hired Faster._
+### What is This Project?
 
-**The open-source, AI-powered resume platform that helps you craft ATS-beating resumes and land your dream job.**
+**Imagine:** You're ready to apply for a job, but you're not sure if your resume is good enough. Will the company's computer system even read it? Will it understand your skills? This project solves that problem!
 
-[![React](https://img.shields.io/badge/React-19.2-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev)
-[![Express](https://img.shields.io/badge/Express-5.2-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com)
-[![Firebase](https://img.shields.io/badge/Firebase-Auth-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
-[![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)](LICENSE)
+The **AI-Powered Resume Builder** is a complete web application that helps you:
+- **Build beautiful resumes** using professional templates
+- **Check if your resume passes ATS** (Applicant Tracking Systems - the computers that read resumes first)
+- **Get AI suggestions** to improve your resume
+- **Manage multiple resumes** for different job positions
+- **Download resumes as PDF** to send to companies
 
-[Live Demo](https://resumeaibyamit.vercel.app/) · [Report Bug](https://github.com/Amitk-umar/Ai-powered-resumebuilder/issues) · [Request Feature](https://github.com/Amitk-umar/Ai-powered-resumebuilder/issues)
+### The Real Problem We're Solving
 
-</div>
+Did you know that **75% of resumes never reach a human recruiter**? They get rejected by computers (ATS systems) BEFORE anyone even looks at them!
 
----
+Most job seekers don't know their resume is formatted wrong or missing important keywords. This app helps you:
+1. See exactly what keywords the job needs
+2. Check if your resume has those keywords
+3. Get suggestions on what to fix
+4. Download a polished PDF ready to send
 
-## 🎯 The Problem
+### Who Can Use This?
 
-> **75% of resumes never reach a human recruiter.** They get rejected by Applicant Tracking Systems (ATS) before anyone even reads them.
-
-Most job seekers don't realize their resume formatting, keyword gaps, and structure are silently killing their chances. Generic resume builders don't solve this — they just give you a pretty template without any intelligence behind it.
-
-## 💡 The Solution
-
-**ResumeAI** combines a beautiful resume builder with an AI-powered ATS screening engine. Instead of guessing whether your resume will pass the ATS, you can **test it before you apply**.
-
-- 📝 Build your resume with 7 professional templates — each designed for different career levels
-- 🤖 Upload any resume + paste a job description → get an instant ATS compatibility score
-- 🎯 See exactly which keywords you're missing and get actionable suggestions
-- 📊 Track all your screenings and resumes from a personal dashboard
-
-**This isn't just another resume builder. It's your personal career intelligence platform.**
+✅ College students building first resumes  
+✅ Job seekers applying for new positions  
+✅ People changing careers  
+✅ Anyone who wants to know if their resume will pass ATS checks
 
 ---
 
-## ✨ Features
+## ✨ Key Features (Explained Simply)
 
-### 👤 User Features
-| Feature | Description |
-|---|---|
-| **Google & Email Auth** | One-click Google sign-in or classic email/password registration |
-| **Personal Dashboard** | Track resumes, screening history, plan status, and activity |
-| **Multi-Resume Management** | Create, edit, delete, and organize multiple resumes |
-| **PDF Export** | One-click download to print-ready PDF format |
-| **Screening History** | Every ATS analysis saved and accessible anytime |
-| **Plan Upgrades** | Request Pro/Premium upgrades directly from dashboard |
+### 📝 Resume Creation
+- **7 Professional Templates** - Choose from Modern, Professional, Minimal, Creative, Executive, ATS Focused, or Technical designs
+- **Easy Form** - Just fill in your information in simple fields (name, email, job experience, etc.)
+- **Live Preview** - See how your resume looks in real-time as you type
+- **Auto-Save** - Your resume saves automatically to the cloud
 
-### 🤖 AI & Analysis Features
-| Feature | Description |
-|---|---|
-| **ATS Resume Screening** | Upload PDF + job description → instant compatibility score |
-| **80+ Keyword Patterns** | Matches against programming languages, frameworks, tools, soft skills |
-| **Formatting Analysis** | Checks sections, contact info, action verbs, quantifiable achievements |
-| **Smart Scoring** | Weighted algorithm: 70% keyword match + 30% formatting quality |
-| **Actionable Suggestions** | Up to 6 tailored recommendations to improve your resume |
-| **Company Matching** | Premium users get skill-matched company suggestions |
+### 🤖 AI-Powered ATS Checker
+- **Upload Resume + Job Description** - Give it your resume and a job posting
+- **Get Instant Score** - See a score from 0-100 showing how well your resume matches the job
+- **See Matched Keywords** - Shows which keywords from the job are in your resume (good!)
+- **See Missing Keywords** - Shows what keywords you're missing (need to add)
+- **Get Suggestions** - AI gives you up to 6 specific tips to improve your resume
+- **Formatting Check** - AI analyzes if your resume has proper sections, contact info, action verbs, and numbers
 
-### 🎨 UI/UX Features
-| Feature | Description |
-|---|---|
-| **Dark-First Design** | Premium glassmorphism with aurora gradients |
-| **Framer Motion** | Smooth page transitions and micro-interactions |
-| **Responsive Layout** | Pixel-perfect on mobile, tablet, and desktop |
-| **7 Resume Templates** | Modern, Professional, Minimal, Creative, Executive, ATS Focused, Technical |
-| **Live Preview** | Real-time resume preview as you type |
-| **Floating Orbs** | Animated background particles for visual depth |
+### 📊 Dashboard & History
+- **See All Your Resumes** - One place to manage all your resume versions
+- **Screening History** - Keep track of every time you checked a resume against a job
+- **Compare Results** - Look back at past ATS checks to see improvements
 
-### 🔒 Security Features
-| Feature | Description |
-|---|---|
-| **Firebase Token Verification** | Server-side ID token validation via Admin SDK |
-| **Protected Routes** | Client-side guards + server middleware for every endpoint |
-| **Role-Based Access** | User, Recruiter, Admin roles with granular permissions |
-| **CORS Protection** | Whitelist-based origin validation |
-| **Input Validation** | Server-side validation on all endpoints |
-| **Secure File Upload** | Type-restricted (PDF/DOCX), size-limited (5MB) uploads |
+### 💳 Subscription Plans
+- **Free Plan (Basic)** - 1 resume, 3 ATS checks, 3 templates
+- **Pro Plan** - 5 resumes, 50 ATS checks, 5 templates
+- **Premium Plan** - Unlimited resumes, unlimited checks, all 7 templates
 
-### 🛠️ Developer Features
-| Feature | Description |
-|---|---|
-| **Modular Architecture** | Clean MVC pattern with separated concerns |
-| **Centralized API Client** | Auto-auth-injecting fetch wrapper |
-| **Custom Error Handling** | `ApiError` class + `asyncHandler` pattern |
-| **Hot Reload** | Vite HMR (frontend) + Nodemon (backend) |
-| **Component Library** | 12 modular home page sections, reusable UI components |
+### 🔐 Security Features (Technical)
+- **Firebase Authentication** - Your login is secure with Firebase (trusted by Google)
+- **Token Verification** - Every request to the server is verified to make sure it's really you
+- **Secure Data Storage** - All your resume data is encrypted and stored safely
+- **Protected Endpoints** - Only you can see and edit your resumes
 
 ---
 
-## 🏗️ Tech Stack
+## 🛠 Technologies Used (Beginner Explanation)
 
-### Frontend
-| Technology | Purpose |
+### Frontend (What Users See) - React & JavaScript
+| Technology | What It Does |
 |---|---|
-| **React 19** | Component-based UI framework |
-| **Vite 8** | Lightning-fast build tool & dev server |
-| **React Router 7** | Client-side routing with guards |
-| **Framer Motion** | Animations & page transitions |
-| **Lucide + React Icons** | Beautiful icon libraries |
-| **Tailwind CSS** (CDN) | Utility-first styling |
-| **html2pdf.js** | Client-side PDF generation |
-| **pdfjs-dist** | PDF rendering in browser |
+| **React 19** | JavaScript library that makes interactive pages (things happen without refreshing) |
+| **Vite** | Fast tool that runs the development server on your computer |
+| **React Router** | Allows clicking between pages (Dashboard, Resume Builder, etc.) |
+| **Axios** | Makes requests to the backend server to send/get data |
+| **Firebase** | Google's service for user login/authentication |
+| **Framer Motion** | Creates smooth animations and transitions |
+| **html2pdf.js** | Converts your resume HTML to a PDF file |
+| **Lucide React Icons** | Beautiful icons for buttons and labels |
 
-### Backend
-| Technology | Purpose |
+### Backend (The Brain) - Node.js & Express
+| Technology | What It Does |
 |---|---|
-| **Express 5** | Fast, minimalist web framework |
-| **Mongoose 9** | Elegant MongoDB object modeling |
-| **Firebase Admin 13** | Server-side token verification |
-| **Multer 2** | Multipart file upload handling |
-| **pdf-parse** | PDF text extraction for screening |
-| **bcryptjs** | Password hashing |
-| **jsonwebtoken** | JWT utilities |
+| **Node.js** | Allows JavaScript to run on a server (not just in browsers) |
+| **Express** | Web framework for creating API endpoints (/api/resumes, /api/screen, etc.) |
+| **MongoDB** | Database that stores all user data, resumes, screening results |
+| **Mongoose** | Makes it easier to work with MongoDB data |
+| **Firebase Admin SDK** | Server-side tool to verify user tokens and manage users |
+| **OpenRouter API** | Connects to AI models (DeepSeek, Llama) for analysis |
+| **pdf-parse** | Extracts text from PDF files users upload |
+| **bcryptjs** | Hashes passwords securely (never stores plain passwords) |
 
-### Infrastructure
+### Where It's Hosted
 | Service | Purpose |
 |---|---|
-| **MongoDB Atlas** | Cloud-hosted database |
-| **Firebase** | Authentication provider |
-| **Vercel** | Frontend deployment |
-| **Render** | Backend deployment |
+| **MongoDB Atlas** | Cloud database (stores all data) |
+| **Firebase** | Google's authentication service |
+| **Vercel** | Frontend hosting (runs the website) |
+| **AWS/Render/Heroku** | Backend hosting (runs the API server) |
 
 ---
 
-## 🏛️ Architecture
+## 🔄 How The Application Works (Step-by-Step)
 
-### System Overview
+### User Journey - What Happens When You Use This App
 
+#### Step 1: Sign Up / Login
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         CLIENT (React + Vite)                   │
-│                                                                 │
-│  ┌──────────┐  ┌──────────┐  ┌───────────┐  ┌──────────────┐  │
-│  │  Pages   │  │Components│  │  Context   │  │  Services    │  │
-│  │          │  │          │  │            │  │              │  │
-│  │ Home     │  │ Navbar   │  │ AuthCtx    │  │ api.js       │  │
-│  │ Dashboard│  │ Protected│  │ ThemeCtx   │  │ (auto-auth   │  │
-│  │ Builder  │  │ Route    │  │            │  │  fetch)      │  │
-│  │ Screener │  │ Orbs     │  │            │  │              │  │
-│  │ Admin    │  │ 12 Home  │  │            │  │              │  │
-│  │ Auth     │  │ Sections │  │            │  │              │  │
-│  └──────────┘  └──────────┘  └───────────┘  └──────┬───────┘  │
-│                                                     │          │
-└─────────────────────────────────────────────────────┼──────────┘
-                                                      │ HTTPS
-┌─────────────────────────────────────────────────────┼──────────┐
-│                      SERVER (Express 5)             │          │
-│                                                     ▼          │
-│  ┌────────────┐  ┌─────────────┐  ┌──────────────────────┐    │
-│  │ Middleware  │  │ Controllers │  │     Services         │    │
-│  │            │  │             │  │                      │    │
-│  │ auth.js    │──▶ authCtrl    │  │ aiScreener.js        │    │
-│  │ (Firebase  │  │ resumeCtrl  │  │ (keyword matching,   │    │
-│  │  verify)   │  │ screenCtrl  │  │  format analysis,    │    │
-│  │            │  │ adminCtrl   │  │  scoring engine)     │    │
-│  │            │  │ plansCtrl   │  │                      │    │
-│  └────────────┘  └──────┬──────┘  └──────────────────────┘    │
-│                         │                                      │
-│                         ▼                                      │
-│               ┌──────────────────┐                             │
-│               │   MongoDB Atlas  │                             │
-│               │                  │                             │
-│               │ Users, Resumes,  │                             │
-│               │ Screenings,      │                             │
-│               │ Contacts, Plans  │                             │
-│               └──────────────────┘                             │
-└────────────────────────────────────────────────────────────────┘
+User goes to website
+    ↓
+Clicks "Sign Up" or "Login"
+    ↓
+Firebase authentication asks for email and password
+    ↓
+User account is created and stored in MongoDB
+    ↓
+User is logged in and can see dashboard
 ```
 
-### Authentication Flow
-
+#### Step 2: Create a Resume
 ```
-User clicks "Sign In" ──▶ Firebase Auth (Google/Email)
-                                    │
-                                    ▼
-                          Get Firebase ID Token
-                                    │
-                                    ▼
-                    POST /api/auth/google (Bearer token)
-                                    │
-                                    ▼
-                      Firebase Admin verifies token
-                                    │
-                                    ▼
-                    Upsert user in MongoDB (auto-admin if email matches)
-                                    │
-                                    ▼
-                         Return user profile + plan info
+User clicks "Create New Resume"
+    ↓
+Selects a template (Modern, Professional, etc.)
+    ↓
+Fills in a form with:
+  • Personal info (name, email, phone)
+  • Education (school, degree, graduation year)
+  • Experience (job title, company, what you did)
+  • Skills (technical, soft, languages, tools)
+  • Projects (what you built)
+    ↓
+Resume is saved to MongoDB database
+    ↓
+User can preview resume in real-time
 ```
 
-### AI Screening Workflow
-
+#### Step 3: Check Resume Against Job Description (ATS Check)
 ```
-User uploads PDF + pastes Job Description
-            │
-            ▼
-    pdf-parse extracts text from resume
-            │
-            ▼
-    AIScreener.extractKeywords() scans JD for 80+ patterns
-            │
-            ▼
-    Match keywords against resume text
-            │
-            ▼
-    Analyze formatting (sections, contact, verbs, metrics)
-            │
-            ▼
-    Score = (keywordMatch × 0.70) + (formatting × 0.30)
-            │
-            ▼
-    Return: score, matched/missing keywords, suggestions, formatting issues
+User goes to "ATS Checker"
+    ↓
+Pastes a job description from a company
+    ↓
+Uploads their resume (PDF or text)
+    ↓
+Backend server receives the data
+    ↓
+AI reads both the resume and job description
+    ↓
+AI extracts keywords from the job (Python, React, Leadership, etc.)
+    ↓
+AI checks which keywords appear in the resume
+    ↓
+AI analyzes formatting:
+  • Does resume have Contact Info section?
+  • Does resume have Education section?
+  • Does resume have Experience section?
+  • Are there action verbs? (Led, Developed, Created)
+  • Are there numbers? (Increased by 50%, Managed 10 people)
+    ↓
+AI calculates score:
+  Score = (Keyword Match × 70%) + (Formatting Quality × 30%)
+    ↓
+Results returned to user:
+  • Overall Score (0-100)
+  • Matched Keywords (what you got right)
+  • Missing Keywords (what you need to add)
+  • Formatting Issues
+  • 6 Suggestions for improvement
+    ↓
+User sees beautiful results with charts
+```
+
+#### Step 4: Download Resume
+```
+User clicks "Download PDF"
+    ↓
+Frontend converts resume HTML to PDF
+    ↓
+PDF file downloads to computer
+    ↓
+User can print or email to companies
 ```
 
 ---
 
-## 📁 Folder Structure
+## 💻 Frontend Explanation (The User Interface)
+
+### What is the Frontend?
+
+The **frontend** is what you see and click on - the entire website interface. It's built with **React**, which is a JavaScript library that makes websites interactive and fast.
+
+### Main Pages Users See
+
+1. **Home Page** - Welcome page with info about the app
+2. **Login/Signup Page** - Where you create account or log in
+3. **Dashboard** - Shows your resumes and screening history
+4. **Resume Builder** - Form where you enter your resume information
+5. **ATS Checker** - Upload resume and job description to get ATS score
+6. **Pricing Page** - Shows subscription plans
+
+### Key Technologies on Frontend
+
+- **React** - Makes interactive components
+- **Vite** - Fast development server (runs on port 5173)
+- **Firebase** - Handles user login
+- **Axios** - Sends requests to backend server
+- **html2pdf.js** - Converts resume to PDF for download
+
+### How Frontend Talks to Backend
+
+Frontend uses REST API (like a waiter taking orders):
+
+```
+Frontend Request:
+POST /api/resumes
+Header: Authorization: Bearer [user_token]
+Body: { name: "John", email: "john@example.com", ... }
+
+↓ (sent over internet to backend server)
+
+Backend Response:
+{
+  success: true,
+  resume: { id: "123", title: "My Resume", ... }
+}
+
+↓ (frontend shows success message to user)
+```
+
+---
+
+## 🗄️ Backend Explanation (The Brain)
+
+### What is the Backend?
+
+The **backend** is the "invisible engine" running on a server. It:
+- Saves your resume to the database
+- Runs the AI analysis
+- Verifies you're logged in
+- Processes payments (if you upgrade)
+
+### Main Responsibilities
+
+1. **Save Resume Data** - When you create/edit resume, backend saves to MongoDB
+2. **Run ATS Analysis** - When you upload resume, backend:
+   - Extracts text from PDF
+   - Analyzes keywords
+   - Checks formatting
+   - Generates suggestions
+3. **Verify User** - Every request checks if it's really you
+4. **Return Results** - Sends analysis results back to frontend
+
+### Backend Structure
+
+- **Controllers** - Handle the logic (like a recipe)
+- **Models** - Define what data looks like (schemas)
+- **Routes** - Define API endpoints (/api/resumes, /api/screen, etc.)
+- **Services** - Connect to external services (AI, PDF parsing)
+- **Middleware** - Check things before processing (authentication)
+
+---
+
+## 🗃️ Database Explanation (The Storage)
+
+### What is the Database?
+
+A **database** is like a digital filing cabinet. We use **MongoDB**, which stores data as JSON documents (like JavaScript objects).
+
+### Collections (Tables) Explained Simply
+
+#### 1. Users Collection
+Stores information about registered users
+```
+{
+  firebaseUid: "unique_user_id",
+  email: "john@example.com",
+  name: "John Doe",
+  plan: "basic"  // or "pro" or "premium"
+}
+```
+
+#### 2. Resumes Collection
+Stores all resumes users create
+```
+{
+  userId: "unique_user_id",
+  title: "Software Engineer Resume",
+  template: "Modern",
+  personalInfo: { name, email, phone, ... },
+  education: [ { school, degree, ... } ],
+  experience: [ { company, job title, ... } ],
+  skills: { technical, soft, languages, ... }
+}
+```
+
+#### 3. Screenings Collection
+Stores results of every ATS check
+```
+{
+  userId: "unique_user_id",
+  resumeId: "resume_id",
+  jobDescription: "Full job posting text",
+  score: 78,
+  matchedKeywords: ["React", "JavaScript", ...],
+  missingKeywords: ["Docker", "Kubernetes", ...],
+  suggestions: ["Add Docker to skills", ...]
+}
+```
+
+---
+
+## 📁 Folder Structure (Where Everything Lives)
 
 ```
 resumebuilder/
 │
-├── client/                              # ⚡ React Frontend (Vite)
-│   ├── public/
-│   │   ├── brand-images/                # Company logos for marquee strip
-│   │   └── professional.png             # Hero section image
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── home/                    # 12 modular landing page sections
-│   │   │   │   ├── HeroSection.jsx      #   ↳ Typewriter hero with floating cards
-│   │   │   │   ├── BrandStrip.jsx       #   ↳ Scrolling company logo marquee
-│   │   │   │   ├── FeatureGrid.jsx      #   ↳ Bento grid feature showcase
-│   │   │   │   ├── StatsSection.jsx     #   ↳ Animated counter statistics
-│   │   │   │   ├── HowItWorks.jsx       #   ↳ 3-step process explainer
-│   │   │   │   ├── AtsDemoSection.jsx   #   ↳ Live ATS demo widget
-│   │   │   │   ├── TestimonialsSection  #   ↳ User testimonial cards
-│   │   │   │   ├── PricingSection.jsx   #   ↳ Tiered pricing cards
-│   │   │   │   ├── FaqSection.jsx       #   ↳ Accordion FAQ
-│   │   │   │   ├── ContactSection.jsx   #   ↳ Contact form
-│   │   │   │   ├── CtaSection.jsx       #   ↳ Call-to-action banner
-│   │   │   │   └── FooterSection.jsx    #   ↳ Site footer
-│   │   │   ├── Navbar.jsx               # Global navigation with auth state
-│   │   │   ├── ProtectedRoute.jsx       # Auth + role guard wrapper
-│   │   │   ├── FloatingOrbs.jsx         # Animated background particles
-│   │   │   └── ThemeToggle.jsx          # Dark/light mode switcher
-│   │   ├── pages/
-│   │   │   ├── Home.jsx                 # Landing page (composes 12 sections)
-│   │   │   ├── Login.jsx                # Google + email login
-│   │   │   ├── Signup.jsx               # Registration with validation
-│   │   │   ├── ForgotPassword.jsx       # Firebase password reset
-│   │   │   ├── Dashboard.jsx            # User hub: resumes, screenings, plan
-│   │   │   ├── ResumeBuilder.jsx        # 5-step wizard with live preview
-│   │   │   ├── ResumeScreener.jsx       # Upload + analyze + results
-│   │   │   └── AdminDashboard.jsx       # Admin panel (stats, users, requests)
-│   │   ├── context/
-│   │   │   ├── AuthContext.jsx          # Firebase auth state & API sync
-│   │   │   └── ThemeContext.jsx         # Dark/light theme provider
-│   │   ├── services/
-│   │   │   └── api.js                   # Centralized fetch client (auto-auth)
-│   │   ├── config/
-│   │   │   └── firebase.js              # Firebase app + Google provider init
-│   │   ├── constants/
-│   │   │   └── homeData.jsx             # Landing page content & config data
-│   │   ├── App.jsx                      # Root component with all routes
-│   │   ├── main.jsx                     # React DOM entry point
-│   │   └── index.css                    # Global design system & styles
-│   ├── index.html                       # HTML shell with fonts + Tailwind CDN
-│   ├── vite.config.js                   # Vite plugins & dev server config
-│   └── package.json
+├── client/                              # React Frontend
+│   └── src/
+│       ├── pages/                       # Full page components
+│       │   ├── Home.jsx                 # Landing page
+│       │   ├── Login.jsx                # Login page
+│       │   ├── Dashboard.jsx            # User dashboard
+│       │   ├── ResumeBuilder.jsx        # Resume editor
+│       │   └── ResumeScreener.jsx       # ATS checker
+│       ├── components/                  # Reusable UI components
+│       ├── services/
+│       │   └── api.js                   # Makes requests to backend
+│       ├── config/
+│       │   └── firebase.js              # Firebase setup
+│       └── App.jsx                      # Main app file
 │
-├── server/                              # 🖥️ Express Backend
-│   ├── config/
-│   │   ├── db.js                        # MongoDB connection with graceful fallback
-│   │   ├── firebase-admin.js            # Admin SDK init + token verifier
-│   │   └── plans.js                     # Plan definitions + getActivePlan()
-│   ├── middleware/
-│   │   └── auth.js                      # Token verification + adminOnly guard
-│   ├── models/
-│   │   ├── User.js                      # Users with roles, plans, resume refs
-│   │   ├── Resume.js                    # Full resume schema (7 templates)
-│   │   ├── Screening.js                 # ATS screening results
-│   │   ├── Contact.js                   # Contact form submissions
-│   │   └── PlanRequest.js               # Plan upgrade requests
-│   ├── controllers/
-│   │   ├── authController.js            # Google sync + profile endpoint
-│   │   ├── resumeController.js          # CRUD with plan-based limits
-│   │   ├── screeningController.js       # File upload + AI analysis trigger
-│   │   ├── screeningsController.js      # Screening history CRUD
-│   │   ├── plansController.js           # Plan info, upgrades, companies
-│   │   └── adminController.js           # Dashboard stats + request handling
-│   ├── routes/
-│   │   ├── auth.js                      # POST /google, GET /me
-│   │   ├── resume.js                    # Full CRUD /api/resumes
-│   │   ├── screening.js                 # POST /api/screen
-│   │   ├── screenings.js               # CRUD /api/screenings
-│   │   ├── plans.js                     # GET/POST /api/plans
-│   │   ├── contact.js                   # POST /api/contact
-│   │   └── admin.js                     # Admin-only endpoints
+├── server/                              # Express Backend
+│   ├── controllers/                     # Logic for handling requests
+│   │   ├── authController.js
+│   │   ├── resumeController.js
+│   │   └── screeningController.js
+│   ├── models/                          # Database schemas
+│   │   ├── User.js
+│   │   ├── Resume.js
+│   │   └── Screening.js
+│   ├── routes/                          # API endpoints
+│   │   ├── auth.js
+│   │   ├── resume.js
+│   │   └── screening.js
 │   ├── services/
-│   │   └── aiScreener.js               # 🧠 Core AI screening engine
-│   ├── utils/
-│   │   ├── ApiError.js                  # Custom HTTP error class
-│   │   └── asyncHandler.js              # Async route error wrapper
-│   ├── server.js                        # Express app entry point
-│   └── package.json
+│   │   └── aiScreener.js                # AI analysis logic
+│   ├── middleware/
+│   │   └── auth.js                      # Checks if user is logged in
+│   ├── config/
+│   │   ├── db.js                        # MongoDB connection
+│   │   └── firebase-admin.js            # Firebase setup
+│   └── server.js                        # Main server file
 │
-├── .gitignore
-└── README.md
+└── README.md                            # This file
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🔗 API Flow (Data Communication)
 
-### Prerequisites
+### What is an API?
 
-| Requirement | Version |
-|---|---|
-| Node.js | ≥ 18.x |
-| npm | ≥ 9.x |
-| MongoDB | Atlas cluster or local instance |
-| Firebase | Project with Auth enabled |
+An **API** is like a waiter in a restaurant:
+- **Frontend** = Customer ordering food
+- **Backend** = Kitchen making the food
+- **API** = Waiter taking order and bringing food
 
-### 1. Clone the Repository
+### Example: Creating a Resume
+
+```
+STEP 1: User fills form and clicks "Save"
+            ↓
+STEP 2: Frontend prepares data and sends to backend:
+        POST /api/resumes
+        Headers: { Authorization: "Bearer firebase_token" }
+        Body: { title, template, personalInfo, education, ... }
+            ↓
+STEP 3: Backend receives request and checks:
+        - Is the user really logged in? (checks token)
+        - Is this user allowed to create more resumes? (checks plan)
+        - Is the template allowed for this plan?
+            ↓
+STEP 4: Backend saves to MongoDB:
+        - Creates new Resume document
+        - Links to user ID
+        - Sets timestamps
+            ↓
+STEP 5: Backend sends response back:
+        { success: true, resume: { _id: "123", title: "..." } }
+            ↓
+STEP 6: Frontend receives response and updates UI:
+        - Shows success message
+        - Adds new resume to list
+        - User can now edit it
+```
+
+### Main API Endpoints
+
+| Endpoint | Purpose | What You Send | What You Get Back |
+|---|---|---|---|
+| `POST /api/auth/register` | Create account | email, password | user info |
+| `POST /api/auth/login` | Login | email, password | user token |
+| `GET /api/resumes` | Get all your resumes | (nothing) | list of resumes |
+| `POST /api/resumes` | Create new resume | resume data | new resume with ID |
+| `PUT /api/resumes/:id` | Update resume | updated data | updated resume |
+| `DELETE /api/resumes/:id` | Delete resume | (nothing) | success message |
+| `POST /api/screen` | Check ATS score | resume + job description | score + suggestions |
+| `GET /api/screenings` | Get screening history | (nothing) | list of past checks |
+
+---
+
+## 📥 Installation Steps (How to Set Up)
+
+### What You Need First
+
+1. **Node.js** (≥ version 18) - [Download](https://nodejs.org/)
+2. **npm** or **yarn** (comes with Node.js)
+3. **MongoDB Account** - [Free account](https://www.mongodb.com/cloud/atlas)
+4. **Firebase Project** - [Create free project](https://firebase.google.com/)
+5. **Text Editor** - VS Code recommended - [Download](https://code.visualstudio.com/)
+6. **Git** - [Download](https://git-scm.com/)
+
+### Step 1: Clone the Project
 
 ```bash
+# Open terminal/command prompt and run:
 git clone https://github.com/Amitk-umar/Ai-powered-resumebuilder.git
+
+# Go into project directory
 cd Ai-powered-resumebuilder
 ```
 
-### 2. Backend Setup
+### Step 2: Install Backend Dependencies
 
 ```bash
+# Go to server folder
 cd server
+
+# Install all packages needed for backend
 npm install
+
+# This downloads: Express, MongoDB, Firebase, AI tools, etc.
 ```
 
-Create `server/.env`:
+### Step 3: Install Frontend Dependencies
+
+```bash
+# Go to client folder (from project root)
+cd ../client
+
+# Install all packages needed for frontend
+npm install
+
+# This downloads: React, Vite, Firebase, Icons, etc.
+```
+
+### Step 4: Set Up Environment Variables
+
+#### Backend Setup (server/.env)
+
+Create a file called `.env` in the `server` folder:
+
 ```env
-# Server
 PORT=5000
 NODE_ENV=development
 
-# MongoDB — get your URI from https://cloud.mongodb.com
-MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/resumebuilder
+# MongoDB — Get this from MongoDB Atlas
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/resumebuilder
 
-# Firebase Admin — download service account from Firebase Console
+# Firebase — Get these from Firebase Console
 FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxx@your-project.iam.gserviceaccount.com
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk@your-project.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
-# Admin — this email gets auto-assigned admin role on login
-ADMIN_EMAIL=your-admin@email.com
+# OpenRouter API for AI (get free key at openrouter.ai)
+OPENROUTER_API_KEY=your-openrouter-key
 ```
 
-```bash
-npm run dev    # Starts on http://localhost:5000
-```
+#### Frontend Setup (client/.env)
 
-### 3. Frontend Setup
+Create a file called `.env` in the `client` folder:
 
-```bash
-cd ../client
-npm install
-```
-
-Create `client/.env`:
 ```env
-# Backend API URL
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5000
 
-# Firebase Client — from Firebase Console > Project Settings
+# Firebase settings — get from Firebase Console
 VITE_FIREBASE_API_KEY=AIzaSy...
 VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your-project-id
-VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=000000000000
 VITE_FIREBASE_APP_ID=1:000:web:000
 ```
 
-```bash
-npm run dev    # Starts on http://localhost:5173
-```
+---
 
-> ⚠️ **Important:** Never commit `.env` files. They're already in `.gitignore`.
+## 🚀 How to Run the Project
 
-### 4. Production Build
+### Start Backend Server
 
 ```bash
-cd client && npm run build    # Outputs to client/dist/
-cd ../server && npm start     # Production mode (no auto-restart)
+# Open terminal 1
+cd server
+npm run dev
+
+# You should see: "Server running on http://localhost:5000"
 ```
+
+### Start Frontend Server
+
+```bash
+# Open NEW terminal (terminal 2)
+cd client
+npm run dev
+
+# You should see: "VITE v8.x.x ready in port 5173"
+```
+
+### Open in Browser
+
+1. Open browser (Chrome, Firefox, Safari, etc.)
+2. Go to `http://localhost:5173`
+3. Click "Sign Up" to create account
+4. Test the app!
+
+---
+
+## 🔮 Future Improvements
+
+### Features We Could Add
+
+- 📧 Email notifications when jobs match your skills
+- 📱 Mobile app with React Native
+- 🤝 Share resumes with friends for feedback
+- 📈 Analytics dashboard showing resume view stats
+- 🎤 Interview preparation with mock questions
+- 🔗 LinkedIn profile optimization
+- 💬 Live chat support for users
+- 🌍 Support for multiple languages
+- 🤖 AI cover letter generator
+- ✅ Skills verification and badges
+
+---
+
+## 🚧 Challenges Faced
+
+### 1. AI Response Parsing
+
+**Problem:** AI sometimes returns responses wrapped in markdown code blocks instead of pure JSON.
+
+**Solution:** Extract the JSON by finding first `{` and last `}` in the response.
+
+### 2. PDF Text Extraction
+
+**Problem:** Different PDFs extract text differently; scanned image PDFs don't work well.
+
+**Solution:** Add error handling and validate extracted text.
+
+### 3. Firebase Private Key in Environment Variables
+
+**Problem:** Private keys contain newlines that break .env files.
+
+**Solution:** Use literal `\n` characters in the string.
+
+### 4. CORS (Cross-Origin Resource Sharing)
+
+**Problem:** Frontend (port 5173) and backend (port 5000) run on different ports; browsers block requests.
+
+**Solution:** Configure Express to allow requests from frontend origin.
+
+### 5. Plan Limits Enforcement
+
+**Problem:** Need to enforce that free users can only create 1 resume.
+
+**Solution:** Check resume count before allowing creation using middleware.
+
+---
+
+## 🎓 Conclusion
+
+### What This Project Teaches
+
+✅ **Full-Stack Web Development** - Frontend, backend, and database working together
+
+✅ **AI Integration** - Using AI APIs to power real features
+
+✅ **User Authentication** - Secure login with Firebase
+
+✅ **Database Design** - Storing and querying data with MongoDB
+
+✅ **REST API Design** - Building endpoints that frontend and other apps can use
+
+✅ **Real-World Problems** - Solving actual challenges like ATS systems
+
+### Key Takeaways
+
+1. **Modern web apps have three parts:** Frontend (UI), Backend (logic), Database (storage)
+2. **AI is now accessible** - You don't need to build AI from scratch; use APIs
+3. **Security matters** - Always verify users, validate data, protect passwords
+4. **Users first** - Design features that solve real problems
+5. **Full-stack development is powerful** - One person can build complete applications
+
+### Next Steps to Learn More
+
+- Try deploying this app to the internet (Vercel for frontend, Render for backend)
+- Add more features (notifications, analytics, etc.)
+- Learn about payment processing with Stripe
+- Build your own API from scratch
+- Read the code and understand how each part works
+
+---
+
+## 📞 Support
+
+- **Questions?** Check the issues on GitHub
+- **Want to contribute?** Submit a pull request
+- **Found a bug?** Report it on GitHub
+
+---
+
+**Created for learning full-stack web development.**  
+**Last updated: January 2025**
 
 ---
 
