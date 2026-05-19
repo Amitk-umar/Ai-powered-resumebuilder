@@ -1,5 +1,50 @@
 # 🎯 AI-Powered Resume Builder
 
+---
+
+## 📖 Table of Contents
+
+### Getting Started
+1. [Project Introduction](#project-introduction) - What this project does
+2. [Key Features](#-key-features-explained-simply) - All features explained simply
+3. [Technologies Used](#-technologies-used-beginner-explanation) - The tech stack explained
+
+### Understanding the Application
+4. [How The Application Works](#-how-the-application-works-step-by-step) - Complete user journey
+5. [Frontend Explanation](#-frontend-explanation-the-user-interface) - What users see
+6. [Backend Explanation](#-backend-explanation-the-brain) - The logic and processing
+7. [Database Explanation](#-database-explanation-the-storage) - Where data lives
+
+### Technical Details
+8. [Folder Structure](#-folder-structure-where-everything-lives) - Project organization
+9. [API Flow](#-api-flow-data-communication) - How frontend & backend talk
+10. [API Reference](#-api-reference) - All endpoints documented
+
+### Setup & Running
+11. [Installation Steps](#-installation-steps-how-to-set-up) - How to install locally
+12. [How to Run the Project](#-how-to-run-the-project) - Starting the app
+
+### Project Information
+13. [Usage Guide](#-usage-guide) - How to use the application
+14. [Future Improvements](#-future-improvements) - What could be added
+15. [Challenges Faced](#-challenges-faced) - Problems & solutions
+16. [Design Philosophy](#-design-philosophy) - Visual & UX decisions
+17. [Performance](#-performance) - Speed & optimization
+18. [Security](#-security) - How we protect data
+19. [Deployment](#-deployment) - How to deploy online
+
+### Community & Support
+20. [Screenshots](#-screenshots) - Visual preview
+21. [Roadmap](#-roadmap) - Future vision
+22. [Contributing](#-contributing) - How to help
+23. [Acknowledgements](#-acknowledgements) - Credits
+24. [Conclusion](#-conclusion) - Key takeaways
+25. [Support](#-support) - Get help
+26. [License](#-license) - Legal info
+27. [Contact](#-contact) - How to reach us
+
+---
+
 ## Project Introduction
 
 ### What is This Project?
@@ -470,7 +515,7 @@ NODE_ENV=development
 # MongoDB — Get this from MongoDB Atlas
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/resumebuilder
 
-# Firebase — Get these from Firebase Console
+# Firebase �� Get these from Firebase Console
 FIREBASE_PROJECT_ID=your-project-id
 FIREBASE_CLIENT_EMAIL=firebase-adminsdk@your-project.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
